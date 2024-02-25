@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Box, Button, useTheme } from '@mui/material';
 import { useSortable, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -7,6 +7,7 @@ import NewCardForm from './NewCardForm';
 import { animateLayoutChanges } from '../DnD/DnDhooks';
 import TextFieldComponent from '../../../components/TextFieldComponent';
 import { ColumnInterface } from '../../../types/GeneralTypes';
+import { useBoardContext } from '../BoardContext';
 
 interface ColumnProps {
   column: ColumnInterface;
@@ -27,10 +28,14 @@ const Column = ({ column, children, dragOverlay }: ColumnProps) => {
     cursor: isDragging ? 'pointer' : undefined,
     opacity: isDragging ? 0.5 : undefined,
   };
+
   const { isDraggingToTrash, openCardDialog } = useDnD();
   const [isExpanded, setIsExpanded] = useState(false);
+  const { updateBoardFunctions } = useBoardContext();
 
-  const handleSubmit = (data: ColumnInterface) => {};
+  const handleSubmit = (data: ColumnInterface) => {
+    updateBoardFunctions.editColumn(data);
+  };
   return (
     <Box
       {...(openCardDialog ? undefined : listeners)}

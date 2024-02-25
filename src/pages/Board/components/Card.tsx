@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Box, useTheme } from '@mui/material';
 import { CSS } from '@dnd-kit/utilities';
 import { useSortable } from '@dnd-kit/sortable';
@@ -6,6 +6,7 @@ import { useDnD } from '../DnD/DnDContext';
 import TextFieldComponent from '../../../components/TextFieldComponent';
 import MarkdownCard from './MarkdownCard';
 import { CardInterface } from '../../../types/GeneralTypes';
+import { useBoardContext } from '../BoardContext';
 interface CardProps {
   card: CardInterface;
   dragOverlay?: boolean;
@@ -22,7 +23,10 @@ const Card = ({ dragOverlay, card }: CardProps) => {
     transition,
     opacity: isDragging ? 0.5 : undefined,
   };
-  const handleSubmit = (data: CardInterface) => {};
+  const { updateBoardFunctions } = useBoardContext();
+  const handleSubmit = (data: CardInterface) => {
+    updateBoardFunctions.editCard(data);
+  };
 
   return (
     <Box

@@ -1,13 +1,10 @@
 import React, { PropsWithChildren, createContext, useContext, useEffect, useState } from 'react';
 
 import { findItembyId } from './DnDhooks';
-import { BoardInterface, CardInterface, ColumnInterface } from '../../../types/GeneralTypes';
+import { CardInterface, ColumnInterface } from '../../../types/GeneralTypes';
+import { useBoardContext } from '../BoardContext';
 
 interface DnDContextInterface {
-  localBoard: BoardInterface | null;
-  setLocalBoard: React.Dispatch<React.SetStateAction<BoardInterface | null>>;
-  columns: ColumnInterface[];
-  setColumns: React.Dispatch<React.SetStateAction<ColumnInterface[]>>;
   activeId: string | null;
   setActiveId: React.Dispatch<React.SetStateAction<string | null>>;
   activeItem: ColumnInterface | CardInterface | null;
@@ -48,12 +45,6 @@ interface DnDContextInterface {
   setOpenCardDialog: React.Dispatch<React.SetStateAction<boolean>>;
 }
 export const DnDContext = createContext<DnDContextInterface>({
-  localBoard: null,
-  setLocalBoard: () => {},
-
-  columns: [],
-  setColumns: () => {},
-
   activeId: null,
   setActiveId: () => {},
 
@@ -83,12 +74,8 @@ export const DnDContext = createContext<DnDContextInterface>({
 });
 
 export const DnDcontextProvider = ({ children }: PropsWithChildren<object>) => {
-  const [localBoard, setLocalBoard] = useState<BoardInterface | null>(null);
-
-  const [columns, setColumns] = useState<ColumnInterface[]>([]);
-
+  const { board } = useBoardContext();
   const [activeId, setActiveId] = useState<string | null>(null);
-
   const [activeItem, setActiveItem] = useState<ColumnInterface | CardInterface | null>(null);
 
   const [isDraggingToTrash, setIsDraggingToTrash] = useState<boolean>(false);
@@ -113,10 +100,6 @@ export const DnDcontextProvider = ({ children }: PropsWithChildren<object>) => {
   const [openCardDialog, setOpenCardDialog] = useState(false);
 
   const contextValue = {
-    localBoard,
-    setLocalBoard,
-    columns,
-    setColumns,
     activeId,
     setActiveId,
     activeItem,
@@ -138,12 +121,12 @@ export const DnDcontextProvider = ({ children }: PropsWithChildren<object>) => {
   };
 
   useEffect(() => {
-    if (columns && activeId !== null) {
-      setActiveItem(findItembyId(columns, activeId));
+    if (activeId !== null) {
+      setActiveItem(board && findItembyId(board.columns, activeId));
     } else {
       setActiveItem(null);
     }
-  }, [activeId, columns]);
+  }, [activeId, board]);
 
   useEffect(() => {
     if (activeItem && 'cards' in activeItem) {

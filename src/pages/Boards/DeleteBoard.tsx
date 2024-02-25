@@ -1,20 +1,21 @@
 import React from 'react';
 import { Button } from '@mui/material';
 import { BoardInterface } from '../../types/GeneralTypes';
+import { useBoardsStore } from '../../stores/BoardsStore';
 
 interface Props {
   board: BoardInterface | null;
   setOpenDialog: React.Dispatch<React.SetStateAction<boolean>>;
   setBoardMenu: React.Dispatch<React.SetStateAction<HTMLElement | null>>;
-  setLocalBoards: React.Dispatch<React.SetStateAction<BoardInterface[]>>;
 }
 
-export default function DeleteBoard({ board, setOpenDialog, setBoardMenu, setLocalBoards }: Props) {
+export default function DeleteBoard({ board, setOpenDialog, setBoardMenu }: Props) {
+  const [storeBoardList, setStoreBoardList] = useBoardsStore((state) => [state.storeBoardList, state.setStoreBoardList]);
   const handledeleteBoard_API = async () => {
-    setLocalBoards((prev) => {
-      const newBoards = prev.filter((b) => b.id !== board?.id);
-      return newBoards;
-    });
+    const clonedBoards = [...storeBoardList];
+    const adjustedBoards = clonedBoards.filter((b) => b.id !== board?.id);
+    setStoreBoardList(adjustedBoards);
+    // --------------------------------------------------------------------- //
     setOpenDialog(false);
     setBoardMenu(null);
   };

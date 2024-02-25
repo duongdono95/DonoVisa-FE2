@@ -1,26 +1,32 @@
 import { Box, IconButton, TextField } from '@mui/material';
 import React, { useRef, useState } from 'react';
-import { useOutsideClick } from '../../../hooks/GeneralHooks';
+import { randomId, useOutsideClick } from '../../../hooks/GeneralHooks';
 import { Send } from 'lucide-react';
-import { useDnD } from '../DnD/DnDContext';
-import { API_createColumn } from '../../../hooks/fetchingFunctions';
 import { useBoardContext } from '../BoardContext';
+import { ColumnInterface, GUEST_ID } from '../../../types/GeneralTypes';
+
 interface Props {
   isExpanded: boolean;
   setIsExpanded: React.Dispatch<React.SetStateAction<boolean>>;
 }
 const NewColumnForm = ({ isExpanded, setIsExpanded }: Props) => {
   const textFieldRef = useRef<HTMLDivElement>(null);
-  const { form, setForm, createColumn } = API_createColumn({ setIsExpanded });
-  const { setBoard } = useBoardContext();
+  const { board } = useBoardContext();
+  const [form, setForm] = useState<Omit<ColumnInterface, '_id'>>({
+    id: randomId(),
+    ownerId: GUEST_ID,
+    boardId: board?.id ?? '',
+    title: 'Column Title ...',
+    createdAt: '',
+    updatedAt: null,
+    _destroy: false,
+    cards: [],
+    cardOrderIds: [],
+  });
+  const { updateBoardFunctions } = useBoardContext();
   const handleCreateNewColumn = async () => {
-    // createColumn.mutate(form);
-    setBoard((prev) => {
-      if (!prev) return null;
-      const clonedBoard = { ...prev };
-      clonedBoard.columns.push(form);
-      return clonedBoard;
-    });
+    updateBoardFunctions.addNewColumn(form);
+    setIsExpanded(false);
   };
   useOutsideClick(textFieldRef, () => {
     if (isExpanded) setIsExpanded(false);

@@ -6,7 +6,6 @@ import Card from './Card';
 import { createPortal } from 'react-dom';
 import BoardTrashBin from './BoardTrashBin';
 import CreateNewBox from './CreateNewBox';
-import { useBoardsStore } from '../../../stores/BoardsStore';
 import { CardInterface, ColumnInterface } from '../../../types/GeneralTypes';
 import { useDnD } from '../DnD/DnDContext';
 import { dropAnimation } from '../DnD/DnDhooks';
@@ -18,7 +17,7 @@ interface Props {
 }
 
 const BoardColumns = ({ boardBarHeight }: Props) => {
-  const { columns, activeItem, isDraggingToTrash } = useDnD();
+  const { activeItem, isDraggingToTrash } = useDnD();
   const { board } = useBoardContext();
   return (
     board && (

@@ -11,13 +11,15 @@ import {
 import { findColumnById } from './DnDhooks';
 import { useDnD } from './DnDContext';
 import { CREATE_NEW_ID, TRASH_ID } from './DroppableContainer';
+import { ColumnInterface } from '../../../types/GeneralTypes';
 
 interface CreateCollisionDetectionStrategyProps {
   lastOverId: React.MutableRefObject<UniqueIdentifier | null>;
   recentlyMovedToNewContainer: React.MutableRefObject<boolean>;
+  columns: ColumnInterface[];
 }
-export const createCollisionDetectionStrategy = ({ lastOverId, recentlyMovedToNewContainer }: CreateCollisionDetectionStrategyProps) => {
-  const { activeId, columns } = useDnD();
+export const createCollisionDetectionStrategy = ({ lastOverId, recentlyMovedToNewContainer, columns }: CreateCollisionDetectionStrategyProps) => {
+  const { activeId } = useDnD();
   const containerIdOrder = columns.map((container) => container.id);
   const collisionDetectionStrategy: CollisionDetection = (args) => {
     // --------------------------------- find the overId ------------------------------------------

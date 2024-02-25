@@ -1,11 +1,8 @@
 import { Box, IconButton, TextField, useTheme } from '@mui/material';
 import React, { useRef, useState } from 'react';
-import { useOutsideClick } from '../../../hooks/GeneralHooks';
+import { randomId, useOutsideClick } from '../../../hooks/GeneralHooks';
 import { Send } from 'lucide-react';
-import { useDnD } from '../DnD/DnDContext';
-import { useAppStore } from '../../../stores/AppStore';
-import { ColumnInterface } from '../../../types/GeneralTypes';
-import { API_createNewCard } from '../../../hooks/fetchingFunctions';
+import { CardInterface, ColumnInterface, GUEST_ID } from '../../../types/GeneralTypes';
 import { useBoardContext } from '../BoardContext';
 
 interface Props {
@@ -16,9 +13,19 @@ interface Props {
 const NewCardForm = ({ isExpanded, setIsExpanded, column }: Props) => {
   const theme = useTheme();
   const textFieldRef = useRef<HTMLDivElement>(null);
-  const { form, setForm, createCard } = API_createNewCard({ column, setIsExpanded });
+  const { updateBoardFunctions } = useBoardContext();
+  const [form, setForm] = useState<Omit<CardInterface, '_id'>>({
+    id: randomId(),
+    ownerId: GUEST_ID,
+    columnId: column.id,
+    title: 'Card Title ...',
+    _destroy: false,
+    createdAt: new Date().toString(),
+    updatedAt: null,
+  });
   const handlecreateNewColumn = async () => {
-    createCard.mutate();
+    updateBoardFunctions.addNewCard(form);
+    setIsExpanded(false);
   };
 
   useOutsideClick(textFieldRef, () => {

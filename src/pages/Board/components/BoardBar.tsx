@@ -5,16 +5,16 @@ import { CrownBadge, useDivSizeThroughRef } from '../../../hooks/GeneralHooks';
 import { toast } from 'react-toastify';
 import { GUEST_ID } from '../../../types/GeneralTypes';
 import { useAppStore } from '../../../stores/AppStore';
-import { useBoardContext } from '../BoardContext';
+import { useBoardsStore } from '../../../stores/BoardsStore';
 
 const BoardBar = () => {
   const theme = useTheme();
+  const [storeBoard, setStoreBoard] = useBoardsStore((state) => [state.storeBoard, state.setStoreBoard]);
   const boardBarRef = useRef<HTMLDivElement>(null);
   const boardBarHeight = useDivSizeThroughRef(boardBarRef, 'height');
   const [setBoardBarHeight] = useAppStore((state) => [state.setBoardBarHeight]);
   const [user] = useAppStore((state) => [state.user]);
-  const { board, setBoard } = useBoardContext();
-
+  const [localBoard, setLocalBoard] = useState(storeBoard);
   const [isStarred, setIsStarred] = useState(false);
   const [isReadOnly, setIsReadOnly] = useState(true);
 
@@ -23,13 +23,20 @@ const BoardBar = () => {
       toast.warning('Please Sign In to continue the action!');
     }
   };
-
   useEffect(() => {
     boardBarHeight && setBoardBarHeight(boardBarHeight);
   }, [boardBarHeight, setBoardBarHeight]);
-  useEffect(() => {});
+
+  useEffect(() => {
+    setLocalBoard(storeBoard);
+  }, [storeBoard]);
+  useEffect(() => {
+    if (localBoard) {
+      setStoreBoard(localBoard);
+    }
+  }, [localBoard]);
   return (
-    board && (
+    localBoard && (
       <Box className="board-bar" ref={boardBarRef} sx={{ bgcolor: theme.palette.mode === 'dark' ? 'var(--white01)' : 'var(--black01)' }}>
         <Box className="left">
           <Star
@@ -49,8 +56,8 @@ const BoardBar = () => {
               readOnly: isReadOnly,
             }}
             fullWidth
-            value={board.title}
-            onChange={(e) => setBoard({ ...board, title: e.target.value })}
+            value={localBoard.title}
+            onChange={(e) => setLocalBoard({ ...localBoard, title: e.target.value })}
             onKeyDown={(e) => {
               if (e.code === 'Enter') {
                 setIsReadOnly(true);
@@ -84,7 +91,7 @@ const BoardBar = () => {
                 />
               </Tooltip>
             </Badge>
-            {board.memberIds.map((user, index) => {
+            {localBoard.memberIds.map((user, index) => {
               return (
                 <Avatar
                   key={index}

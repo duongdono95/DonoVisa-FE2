@@ -1,7 +1,5 @@
-import { z } from 'zod';
 import { BoardInterface, VisibilityTypeEnum, UserInterface } from '../types/GeneralTypes';
-import { v4 as uuid } from 'uuid';
-import { randomId, slugify } from '../hooks/GeneralHooks';
+import { randomId } from '../hooks/GeneralHooks';
 
 export const GUEST_ID = 'guestId';
 export const emptyBoard: BoardInterface = {

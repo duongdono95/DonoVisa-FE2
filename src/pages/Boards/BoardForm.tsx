@@ -8,19 +8,19 @@ import { useAppStore } from '../../stores/AppStore';
 import { emptyBoard } from '../../utils/constants';
 import { slugify } from '../../hooks/GeneralHooks';
 import { useNavigate } from 'react-router-dom';
+import { useBoardsStore } from '../../stores/BoardsStore';
 interface Props {
   board: BoardInterface | null;
   type: 'edit' | 'create' | 'confirmDelete' | null;
   setOpenDialog: React.Dispatch<React.SetStateAction<boolean>>;
-  setLocalBoards: React.Dispatch<React.SetStateAction<BoardInterface[]>>;
 }
-const BoardForm = ({ board, type, setOpenDialog, setLocalBoards }: Props) => {
+const BoardForm = ({ board, type, setOpenDialog }: Props) => {
   const navigate = useNavigate();
   const [user] = useAppStore((state) => [state.user]);
+  const [storeBoardList, setStoreBoardList] = useBoardsStore((state) => [state.storeBoardList, state.setStoreBoardList]);
   const [localBoard, setLocalBoard] = useState<BoardInterface>(board ?? { ...emptyBoard, ownerId: user?.id ?? '' });
   const [error, setError] = useState<{ path: string; message: string }>({ path: '', message: '' });
   const theme = useTheme();
-
   const handleCreateNew = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const validatedBoard = BoardSchema.safeParse(localBoard);
@@ -30,10 +30,11 @@ const BoardForm = ({ board, type, setOpenDialog, setLocalBoards }: Props) => {
         message: validatedBoard.error.errors[0].message,
       });
     }
-    setLocalBoards((prev) => [...prev, { ...validatedBoard.data, slug: slugify(validatedBoard.data.title) }]);
+    const clonedBoards = [...storeBoardList];
+    clonedBoards.push({ ...validatedBoard.data, slug: slugify(validatedBoard.data.title) });
+    setStoreBoardList(clonedBoards);
     setOpenDialog(false);
   };
-
   const handleUpdateBoard = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const validatedBoard = BoardSchema.safeParse(localBoard);
@@ -43,13 +44,10 @@ const BoardForm = ({ board, type, setOpenDialog, setLocalBoards }: Props) => {
         message: validatedBoard.error.errors[0].message,
       });
     }
-
-    setLocalBoards((prev) => {
-      const clonedBoard = [...prev];
-      const boardIndex = clonedBoard.findIndex((b) => b.id === validatedBoard.data.id);
-      clonedBoard[boardIndex] = validatedBoard.data;
-      return clonedBoard;
-    });
+    const clonedBoards = [...storeBoardList];
+    const boardIndex = clonedBoards.findIndex((b) => b.id === validatedBoard.data.id);
+    clonedBoards[boardIndex] = validatedBoard.data;
+    setStoreBoardList(clonedBoards);
     setOpenDialog(false);
   };
 

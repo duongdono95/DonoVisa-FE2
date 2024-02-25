@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import NavBar from '../../components/NavBar';
 import './Boards.scss';
 import { useAppStore } from '../../stores/AppStore';
@@ -13,10 +13,9 @@ import BoardForm from './BoardForm';
 import { useBoardsStore } from '../../stores/BoardsStore';
 const Boards = () => {
   const [appBarHeight, user] = useAppStore((state) => [state.appBarHeight, state.user]);
-  const [boardList, setBoardList] = useBoardsStore((state) => [state.boardList, state.setBoardList]);
+  const [storeBoardList] = useBoardsStore((state) => [state.storeBoardList]);
   const theme = useTheme();
   const navigate = useNavigate();
-  const [localBoards, setLocalBoards] = useState<BoardInterface[]>(boardList);
   const [boardMenu, setBoardMenu] = React.useState<null | HTMLElement>(null);
   const [openDiaglog, setOpenDialog] = useState(false);
   const [dialogType, setDialogType] = useState<'create' | 'edit' | 'confirmDelete' | null>(null);
@@ -24,9 +23,6 @@ const Boards = () => {
   const handleNavigate = (board: BoardInterface) => {
     navigate(`/boards/${board.slug}`, { state: { boardId: board.id } });
   };
-  useEffect(() => {
-    if (localBoards) setBoardList(localBoards);
-  }, [localBoards]);
   return (
     <div className="boards-page">
       <NavBar />
@@ -52,6 +48,7 @@ const Boards = () => {
             onClick={() => {
               setOpenDialog(true);
               setDialogType('create');
+              setClickedBoard({ ...emptyBoard, ownerId: user?.id ?? '' });
               user && user.firstName === GUEST_ID && toast.warning('Guest Mode - The Created Data will be saved for 24 hours.');
             }}
           >
@@ -59,7 +56,7 @@ const Boards = () => {
             Create New Board
           </Button>
           <div className="board-list">
-            {localBoards.map((board, index) => (
+            {storeBoardList.map((board, index) => (
               <Box
                 key={index}
                 className="board"
@@ -102,7 +99,7 @@ const Boards = () => {
             }}
           >
             <MenuItem
-              onClick={(e) => {
+              onClick={() => {
                 setBoardMenu(null);
                 setOpenDialog(true);
                 setDialogType('edit');
@@ -133,9 +130,9 @@ const Boards = () => {
         }}
       >
         {dialogType === 'confirmDelete' ? (
-          <DeleteBoard board={clickedBoard} setOpenDialog={setOpenDialog} setBoardMenu={setBoardMenu} setLocalBoards={setLocalBoards} />
+          <DeleteBoard board={clickedBoard} setOpenDialog={setOpenDialog} setBoardMenu={setBoardMenu} />
         ) : (
-          <BoardForm board={clickedBoard} type={dialogType} setOpenDialog={setOpenDialog} setLocalBoards={setLocalBoards} />
+          <BoardForm board={clickedBoard} type={dialogType} setOpenDialog={setOpenDialog} />
         )}
       </Dialog>
     </div>

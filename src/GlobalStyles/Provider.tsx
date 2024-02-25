@@ -9,7 +9,6 @@ import { CssBaseline } from '@mui/material';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-// import { DnDcontextProvider } from '../pages/Board/DnD/DnDContext';
 
 const queryClient = new QueryClient();
 const Provider = ({ children }: PropsWithChildren) => {
