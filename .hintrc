@@ -1,0 +1,12 @@
+{
+  "extends": ["development"],
+  "hints": {
+    "compat-api/css": [
+      "default",
+      {
+        "ignore": ["backdrop-filter"]
+      }
+    ],
+    "typescript-config/is-valid": "off"
+  }
+}

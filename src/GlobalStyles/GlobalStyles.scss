@@ -1,0 +1,175 @@
+:root {
+  // -------- variables
+  --default-layout-width: 1150px;
+  --font-family: 'Montserrat', sans-serif;
+
+  --primary-code: 33, 158, 188;
+  --primary: rgb(var(--primary-code));
+  --primary-dark: rgb(2, 48, 71);
+  --primary-light: rgb(142, 202, 230);
+
+  --secondary-code: 255, 183, 3;
+  --secondary: rgb(var(--secondary-code));
+  --secondary-dark: rgb(251, 133, 0);
+
+  --success: rgb(57, 230, 97);
+  --error: rgba(255, 0, 0);
+  --warning: rgba(255, 140, 0);
+  --info: rgba(22, 163, 187);
+
+  // ----------------Default Colors
+  --primary09: rgba(var(--primary-code), 0.9);
+  --primary08: rgba(var(--primary-code), 0.8);
+  --primary07: rgba(var(--primary-code), 0.7);
+  --primary06: rgba(var(--primary-code), 0.6);
+  --primary05: rgba(var(--primary-code), 0.5);
+  --primary04: rgba(var(--primary-code), 0.4);
+  --primary03: rgba(var(--primary-code), 0.3);
+  --primary02: rgba(var(--primary-code), 0.2);
+  --primary01: rgba(var(--primary-code), 0.1);
+
+  --secondary09: rgba(var(--secondary-code), 0.9);
+  --secondary08: rgba(var(--secondary-code), 0.8);
+  --secondary07: rgba(var(--secondary-code), 0.7);
+  --secondary06: rgba(var(--secondary-code), 0.6);
+  --secondary05: rgba(var(--secondary-code), 0.5);
+  --secondary04: rgba(var(--secondary-code), 0.4);
+  --secondary03: rgba(var(--secondary-code), 0.3);
+  --secondary02: rgba(var(--secondary-code), 0.2);
+  --secondary01: rgba(var(--secondary-code), 0.1);
+
+  --black: rgba(0, 0, 0, 1);
+  --black09: rgba(0, 0, 0, 0.9);
+  --black08: rgba(0, 0, 0, 0.8);
+  --black07: rgba(0, 0, 0, 0.7);
+  --black06: rgba(0, 0, 0, 0.6);
+  --black05: rgba(0, 0, 0, 0.5);
+  --black04: rgba(0, 0, 0, 0.4);
+  --black03: rgba(0, 0, 0, 0.3);
+  --black02: rgba(0, 0, 0, 0.2);
+  --black01: rgba(0, 0, 0, 0.1);
+  --black005: rgba(0, 0, 0, 0.05);
+
+  --white: rgba(255, 255, 255, 1);
+  --white09: rgba(255, 255, 255, 0.9);
+  --white08: rgba(255, 255, 255, 0.8);
+  --white07: rgba(255, 255, 255, 0.7);
+  --white06: rgba(255, 255, 255, 0.6);
+  --white05: rgba(255, 255, 255, 0.5);
+  --white04: rgba(255, 255, 255, 0.4);
+  --white03: rgba(255, 255, 255, 0.3);
+  --white02: rgba(255, 255, 255, 0.2);
+  --white01: rgba(255, 255, 255, 0.1);
+  --white005: rgba(255, 255, 255, 0.05);
+
+  --highlight-text-color: rgb(100, 100, 100);
+  --text: rgb(51, 51, 51);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-family);
+  font-weight: 500;
+  text-rendering: optimizespeed;
+  overflow-y: overlay;
+}
+
+a {
+  text-decoration: none;
+  color: var(--text);
+}
+
+// Scrollbar CSS -----------------------------------
+html *::-webkit-scrollbar {
+  border-radius: 0;
+  width: 8px;
+}
+
+html *::-webkit-scrollbar-thumb {
+  border-radius: 4px;
+  background-color: var(--primary);
+}
+
+html *::-webkit-scrollbar-track {
+  border-radius: 0;
+  background-color: rgba(0, 0, 0, 0);
+}
+
+// -----------------------------------
+.noselect {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.PrivateSwipeArea-root {
+  width: 0 !important;
+}
+
+.text-overflow {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.hover-transform-scale {
+  transition: transform 0.2s ease-in-out;
+  &:hover {
+    transform: scale(1.2);
+  }
+}
+
+.animated-tilt-shaking {
+  animation: tilt-shaking 1s linear infinite;
+}
+.animated-tilt-shaking-fast {
+  animation: tilt-shaking 0.2s linear infinite;
+}
+@keyframes tilt-shaking {
+  0% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(5deg);
+  }
+  50% {
+    transform: rotate(0eg);
+  }
+  75% {
+    transform: rotate(-5deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+.animated-rotation {
+  animation: rotation 2s linear infinite;
+}
+
+@keyframes rotation {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes scale {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
