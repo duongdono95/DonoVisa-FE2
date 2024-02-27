@@ -1,7 +1,6 @@
 import React from 'react';
 import { Button } from '@mui/material';
 import { BoardInterface } from '../../types/GeneralTypes';
-import { useBoardsStore } from '../../stores/BoardsStore';
 import { boardFunctions } from '../../hooks/boardFunctions';
 
 interface Props {
@@ -11,8 +10,7 @@ interface Props {
 }
 
 export default function DeleteBoard({ board, setOpenDialog, setBoardMenu }: Props) {
-  const [boardList, setBoardList] = useBoardsStore((state) => [state.boardList, state.setBoardList]);
-  const deleteBoard = boardFunctions.deleteBoard();
+  const deleteBoard = boardFunctions.DeleteBoard();
   const handledeleteBoard_API = async () => {
     if (!board) return;
     deleteBoard(board);

@@ -20,7 +20,7 @@ export const emptyBoard: BoardInterface = {
 export const emptyUserForm: UserInterface = {
   _id: '',
   id: randomId(),
-  firstName: GUEST_ID,
+  firstName: '',
   lastName: '',
   email: '',
   password: '',

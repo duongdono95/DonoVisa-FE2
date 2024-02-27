@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../../stores/AppStore';
 import { GUEST_ID } from '../../types/GeneralTypes';
 import { z } from 'zod';
+import { useBoardsStore } from '../../stores/BoardsStore';
 export default function Home() {
   const theme = useTheme();
   const [state, setState] = useState<'instroduction' | 'features'>('instroduction');
@@ -14,6 +15,7 @@ export default function Home() {
   const [email, setEmail] = useState('');
   const [user] = useAppStore((state) => [state.user]);
   const [invalidEmail, setInvalidEmail] = useState<string | null>(null);
+  const [boardList] = useBoardsStore((state) => [state.boardList]);
   const validateEmail = () => {
     const validator = z.string().email({ message: 'Invalid email' });
     const validatedEmail = validator.safeParse(email);
@@ -75,7 +77,7 @@ export default function Home() {
                 Sign Up with us
               </Button>
             )}
-            {user.firstName === GUEST_ID ? (
+            {user.firstName === GUEST_ID && boardList.length === 0 ? (
               <Button
                 variant="outlined"
                 onClick={() => {
@@ -85,7 +87,7 @@ export default function Home() {
                 Continue as GUEST !
               </Button>
             ) : (
-              <Button onClick={() => navigate('/boards')}>Visit uour Workspaces</Button>
+              <Button onClick={() => navigate('/boards')}>Visit Your Workspaces</Button>
             )}
           </div>
           <div className="hero-img"></div>

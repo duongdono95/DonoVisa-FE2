@@ -12,7 +12,7 @@ interface Props {
 const NewCardForm = ({ isExpanded, setIsExpanded, column }: Props) => {
   const theme = useTheme();
   const textFieldRef = useRef<HTMLDivElement>(null);
-  const createCard = boardFunctions.createCard();
+  const createCard = boardFunctions.CreateCard();
   const [form, setForm] = useState<CardInterface>({
     id: randomId(),
     ownerId: GUEST_ID,

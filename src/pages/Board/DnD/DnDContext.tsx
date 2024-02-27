@@ -36,6 +36,8 @@ interface DnDContextInterface {
       activeCard: CardInterface | null;
     } | null>
   >;
+  openCardDialog: boolean;
+  setOpenCardDialog: React.Dispatch<React.SetStateAction<boolean>>;
 }
 export const DnDContext = createContext<DnDContextInterface>({
   activeId: null,
@@ -58,6 +60,9 @@ export const DnDContext = createContext<DnDContextInterface>({
 
   handleCreateNewItemEvent: null,
   setHandleCreateNewItemEvent: () => {},
+
+  openCardDialog: false,
+  setOpenCardDialog: () => {},
 });
 
 export const DnDcontextProvider = ({ children }: PropsWithChildren<object>) => {
@@ -81,6 +86,8 @@ export const DnDcontextProvider = ({ children }: PropsWithChildren<object>) => {
     activeCard: CardInterface | null;
   } | null>(null);
 
+  const [openCardDialog, setOpenCardDialog] = useState(false);
+
   const contextValue = {
     activeId,
     setActiveId,
@@ -96,6 +103,8 @@ export const DnDcontextProvider = ({ children }: PropsWithChildren<object>) => {
     setDragCardEndEvent,
     handleCreateNewItemEvent,
     setHandleCreateNewItemEvent,
+    openCardDialog,
+    setOpenCardDialog,
   };
 
   return <DnDContext.Provider value={contextValue}>{children}</DnDContext.Provider>;

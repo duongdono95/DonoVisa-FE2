@@ -31,7 +31,7 @@ const Column = ({ column, children, dragOverlay }: ColumnProps) => {
 
   const { isDraggingToTrash, openCardDialog } = useDnD();
   const [isExpanded, setIsExpanded] = useState(false);
-  const editColumn = boardFunctions.editColumn();
+  const editColumn = boardFunctions.EditColumn();
   const handleSubmit = (data: ColumnInterface) => {
     editColumn(data);
   };

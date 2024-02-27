@@ -1,5 +1,5 @@
 import { Box, IconButton, TextField } from '@mui/material';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { randomId, useOutsideClick } from '../../../hooks/GeneralHooks';
 import { Send } from 'lucide-react';
 import { ColumnInterface, ColumnSchema, GUEST_ID } from '../../../types/GeneralTypes';
@@ -14,7 +14,7 @@ interface Props {
 const NewColumnForm = ({ isExpanded, setIsExpanded }: Props) => {
   const textFieldRef = useRef<HTMLDivElement>(null);
   const [board] = useBoardsStore((state) => [state.board]);
-  const createColumn = boardFunctions.createColumn();
+  const createColumn = boardFunctions.CreateColumn();
   const [form, setForm] = useState<ColumnInterface>({
     id: randomId(),
     ownerId: GUEST_ID,

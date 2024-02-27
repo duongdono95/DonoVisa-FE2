@@ -16,7 +16,7 @@ interface CardProps {
 const Card = ({ dragOverlay, card }: CardProps) => {
   const theme = useTheme();
   const [markdownList] = useMarkdownStore((state) => [state.markdownList]);
-  const { activeItem, isDraggingToTrash } = useDnD();
+  const { activeItem, isDraggingToTrash, openCardDialog, setOpenCardDialog } = useDnD();
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: card.id as string,
     data: card as CardInterface,
@@ -26,11 +26,11 @@ const Card = ({ dragOverlay, card }: CardProps) => {
     transition,
     opacity: isDragging ? 0.5 : undefined,
   };
-  const editCard = boardFunctions.editCard();
+  const editCard = boardFunctions.EditCard();
   const handleSubmit = (data: CardInterface) => {
     editCard(data);
   };
-  const [openCardDialog, setOpenCardDialog] = useState(false);
+
   const [cardMarkdown, setCardMarkdown] = useState<MarkdownInterface>();
   useEffect(() => {
     if (markdownList.length > 0) {

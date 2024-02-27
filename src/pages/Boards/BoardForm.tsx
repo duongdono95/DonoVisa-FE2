@@ -14,8 +14,8 @@ interface Props {
 }
 const BoardForm = ({ board, type, setOpenDialog }: Props) => {
   const navigate = useNavigate();
-  const createBoard = boardFunctions.createBoard();
-  const updateBoard = boardFunctions.updateBoard();
+
+  const updateBoard = boardFunctions.UpdateBoard();
   const [user] = useAppStore((state) => [state.user]);
 
   const [localBoard, setLocalBoard] = useState<BoardInterface>(board ?? { ...emptyBoard, ownerId: user?.id ?? '' });
@@ -30,7 +30,8 @@ const BoardForm = ({ board, type, setOpenDialog }: Props) => {
         message: validatedBoard.error.errors[0].message,
       });
     }
-    createBoard({ ...validatedBoard.data, slug: slugify(validatedBoard.data.title) });
+    const newBoard = { ...validatedBoard.data, slug: slugify(validatedBoard.data.title) };
+    // boardFunctions.CreateBoard(setOpenDialog, newBoard);
     setOpenDialog(false);
   };
   const handleUpdateBoard = async (e: React.FormEvent<HTMLFormElement>) => {

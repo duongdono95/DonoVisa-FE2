@@ -1,5 +1,5 @@
 import { AppBar, Avatar, Box, Button, InputAdornment, MenuItem, MenuList, TextField, Tooltip, useTheme } from '@mui/material';
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useAppStore } from '../stores/AppStore';
 import Logo2 from '../assets/Logo2';
 import { LogOut, Search, User2 } from 'lucide-react';
@@ -7,13 +7,22 @@ import { GUEST_ID } from '../types/GeneralTypes';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import BrightModeToggle from './BrightModeToggle';
+import { GuestAccount } from '../utils/constants';
+import { useBoardsStore } from '../stores/BoardsStore';
+import { useDivSizeThroughRef } from '../hooks/GeneralHooks';
 
 const NavBar = () => {
   const theme = useTheme();
   const appBarRef = useRef<HTMLDivElement>(null);
-  const [user] = useAppStore((state) => [state.user]);
+  const [user, setAppBarHeight] = useAppStore((state) => [state.user, state.setAppBarHeight]);
+  const appBarHeight = useDivSizeThroughRef(appBarRef, 'height');
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [setUser] = useAppStore((state) => [state.setUser]);
+  const [setBoardList] = useBoardsStore((state) => [state.setBoardList]);
+  useEffect(() => {
+    appBarHeight && setAppBarHeight(appBarHeight);
+  }, [appBarHeight]);
   return (
     user && (
       <AppBar
@@ -60,6 +69,8 @@ const NavBar = () => {
                   <MenuItem
                     onClick={() => {
                       queryClient.invalidateQueries({ queryKey: ['boards'] });
+                      setUser(GuestAccount);
+                      setBoardList([]);
                       navigate('/');
                     }}
                     sx={{ display: 'flex', gap: '10px', alignItems: 'center' }}

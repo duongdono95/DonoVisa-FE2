@@ -1,6 +1,6 @@
 import { useMarkdownStore } from '../stores/MarkdownStore';
 
-const demoFunction = () => {
+const useDemoFunction = () => {
   const [state] = useMarkdownStore((state) => [state]);
 };
 

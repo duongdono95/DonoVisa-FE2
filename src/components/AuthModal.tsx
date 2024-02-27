@@ -4,21 +4,23 @@ import { Eye, EyeOff } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import GoogleButton from '../pages/Auth/components/GoogleButton';
 import { SignInFormInterface, UserInterface, ValidateSignInForm, userSchema } from '../types/GeneralTypes';
-import { GuestAccount, emptyUserForm } from '../utils/constants';
+import { emptyUserForm } from '../utils/constants';
+import { userFunctions } from '../hooks/userFunctions';
 
 const AuthModal = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const theme = useTheme();
-
   const [form, setForm] = useState<SignInFormInterface | UserInterface>(
     location.pathname === '/sign-in'
       ? { email: location?.state?.email ?? '', password: '' }
-      : { ...emptyUserForm, email: location?.state?.email ?? '' },
+      : { ...emptyUserForm, email: location?.state?.email ?? '', firstName: '' },
   );
   const [showPassword, setShowPassword] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState<{ path: string; message: string }>({ path: '', message: '' });
+  const signIn = userFunctions.userSignIn({ setError });
+  const signUp = userFunctions.userSignUp({ setError });
   const handleSubmit = () => {
     const validatedForm = location.pathname === '/sign-up' ? userSchema.safeParse(form) : ValidateSignInForm.safeParse(form);
     if (location.pathname === '/sign-up') {
@@ -36,8 +38,9 @@ const AuthModal = () => {
       });
     }
     if (!error.path && !error.message && validatedForm.success) {
-      // if (location.pathname === '/sign-up') return signUp.mutate(validatedForm.data as UserInterface);
-      // if (location.pathname === '/sign-in') return signIn.mutate(validatedForm.data as SignInFormInterface);
+      if (location.pathname === '/sign-up') return signUp.mutate(validatedForm.data as UserInterface & { password: string });
+      if (location.pathname === '/sign-in')
+        return signIn.mutate({ email: validatedForm.data.email, password: validatedForm.data.password as string });
     }
   };
   return (
