@@ -8,6 +8,7 @@ import {
   MouseSensor,
   TouchSensor,
   UniqueIdentifier,
+  closestCenter,
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
@@ -16,22 +17,24 @@ import { createCollisionDetectionStrategy } from './CollisionDetectionTrategy';
 import { findColumnById, findItembyId } from './DnDhooks';
 import { unstable_batchedUpdates } from 'react-dom';
 import { useDnD } from './DnDContext';
-import { CardInterface, ColumnInterface } from '../../../types/GeneralTypes';
+import { BoardInterface, CardInterface, ColumnInterface } from '../../../types/GeneralTypes';
 import { randomId } from '../../../hooks/GeneralHooks';
 import { useBoardsStore } from '../../../stores/BoardsStore';
+import { useAppStore } from '../../../stores/AppStore';
 
 interface Props {
   children: React.ReactNode;
   vertical?: boolean;
+  board: BoardInterface;
 }
 export const CREATE_NEW_ID = 'DndCreateNew';
 export const TRASH_ID = 'DndTrash';
-const DroppableContainer = ({ children, vertical }: Props) => {
-  const [storeBoard] = useBoardsStore((state) => [state.storeBoard]);
+const DroppableContainer = ({ children, vertical, board }: Props) => {
   const sensors = useSensors(useSensor(MouseSensor, { activationConstraint: { distance: 10 } }), useSensor(TouchSensor));
   const {
     activeId,
     setActiveId,
+    setActiveItem,
     setIsDraggingToTrash,
     setRequestDeletingItem,
     setDragColumnEndEvent,
@@ -39,29 +42,24 @@ const DroppableContainer = ({ children, vertical }: Props) => {
     setHandleCreateNewItemEvent,
   } = useDnD();
   // -----------------------------------------------------------------------------------------------------------------------------
-  const [columns, setColumns] = useState<ColumnInterface[]>(storeBoard?.columns ?? []);
-  const [containerIdOrder, setContainerIdOrder] = useState<UniqueIdentifier[]>(columns.map((column) => column._id as string));
+  const [editBoard] = useBoardsStore((state) => [state.editBoard]);
+  const [user] = useAppStore((state) => [state.user]);
+  const containerIdOrder = board ? board.columnOrderIds : [];
   // -----------------------------------------------------------------------------------------------------------------------------
   const lastOverId = useRef<UniqueIdentifier | null>(null);
+  const copiedBoard = board;
   const recentlyMovedToNewContainer = useRef(false);
-  const collisionDetectionStrategy = useCallback(
-    createCollisionDetectionStrategy({
-      lastOverId,
-      recentlyMovedToNewContainer,
-      columns,
-    }),
-    [activeId, containerIdOrder],
-  );
-  useEffect(() => {
-    if (storeBoard) {
-      for (const column of columns) {
-        if (column.cards) {
-          column.cardOrderIds = column.cards.map((card) => card._id as string);
-        }
-      }
-      if (columns) return setContainerIdOrder(columns.map((column) => column._id as string));
-    }
-  }, [storeBoard]);
+  const collisionDetectionStrategy = board
+    ? useCallback(
+        createCollisionDetectionStrategy({
+          lastOverId,
+          recentlyMovedToNewContainer,
+          board,
+        }),
+        [activeId, containerIdOrder],
+      )
+    : closestCenter;
+
   return (
     <DndContext
       sensors={sensors}
@@ -83,177 +81,182 @@ const DroppableContainer = ({ children, vertical }: Props) => {
   );
   // -----------------------------------------------------------------------------------------------------------------------------
   function handleDragStart({ active }: DragStartEvent) {
+    if (!board) return;
+    const activeItem = findItembyId(board.columns, active.id);
     setActiveId(active.id as string);
+    setActiveItem(activeItem);
     setRequestDeletingItem(null);
   }
   function handleDragOver({ active, over }: DragOverEvent) {
-    if (!active || !over) return;
+    if (!active || !over || !board || !user) return;
     if (over.id === TRASH_ID) {
       setIsDraggingToTrash(true);
     } else {
       setIsDraggingToTrash(false);
     }
-    // -----------validate the active item, only card is allowed or over item !== trash
+    // -----------validate the active item, only card is allowed or over item !== trash && moving card between different columns -----------------------------
     if (!over.id || over.id === TRASH_ID || over.id === CREATE_NEW_ID || active.id in containerIdOrder) return;
-
-    const activeColumn = findColumnById(columns, active.id);
-    const overColumn = findColumnById(columns, over.id);
+    const activeColumn = findColumnById(board.columns, active.id);
+    const overColumn = findColumnById(board.columns, over.id);
     if (!activeColumn || !overColumn || activeColumn === overColumn) return;
     if (activeColumn !== overColumn) {
-      setColumns((containers) => {
-        const clonedcontainers = [...containers];
-        const activeColumnIndex = clonedcontainers.findIndex((column) => column.id === activeColumn.id);
-        const overCardIndex = overColumn.cards.findIndex((card) => card.id === over.id);
-        const overColumnIndex = clonedcontainers.findIndex((column) => column.id === overColumn.id);
-        let newCardIndex: number;
+      const clonedcontainers = [...board.columns];
+      const activeColumnIndex = clonedcontainers.findIndex((column) => column.id === activeColumn.id);
+      const overCardIndex = overColumn.cards.findIndex((card) => card.id === over.id);
+      const overColumnIndex = clonedcontainers.findIndex((column) => column.id === overColumn.id);
+      let newCardIndex: number;
+      if (over.id in clonedcontainers) {
+        newCardIndex = clonedcontainers.length + 1;
+      } else {
+        const isBelowOverItem = over && active.rect.current.translated && active.rect.current.translated.top > over.rect.top + over.rect.height;
+        const modifier = isBelowOverItem ? 1 : 0;
+        newCardIndex = overCardIndex >= 0 ? overCardIndex + modifier : overColumn.cards.length + 1;
+      }
+      recentlyMovedToNewContainer.current = true;
 
-        if (over.id in clonedcontainers) {
-          newCardIndex = clonedcontainers.length + 1;
-        } else {
-          const isBelowOverItem = over && active.rect.current.translated && active.rect.current.translated.top > over.rect.top + over.rect.height;
-          const modifier = isBelowOverItem ? 1 : 0;
-          newCardIndex = overCardIndex >= 0 ? overCardIndex + modifier : overColumn.cards.length + 1;
-        }
-        recentlyMovedToNewContainer.current = true;
-
-        clonedcontainers[activeColumnIndex] = {
-          ...activeColumn,
-          cards: activeColumn.cards.filter((card) => card.id !== active.id),
-        };
-        clonedcontainers[overColumnIndex] = {
-          ...overColumn,
-          cards: [
-            ...overColumn.cards.slice(0, newCardIndex),
-            ...activeColumn.cards.filter((card) => card.id === active.id),
-            ...overColumn.cards.slice(newCardIndex),
-          ],
-        };
-        return clonedcontainers;
-      });
+      clonedcontainers[activeColumnIndex] = {
+        ...activeColumn,
+        cards: activeColumn.cards.filter((card) => card.id !== active.id),
+      };
+      clonedcontainers[overColumnIndex] = {
+        ...overColumn,
+        cards: [
+          ...overColumn.cards.slice(0, newCardIndex),
+          ...activeColumn.cards.filter((card) => card.id === active.id),
+          ...overColumn.cards.slice(newCardIndex),
+        ],
+      };
+      editBoard({ ...board, columns: clonedcontainers, columnOrderIds: clonedcontainers.map((c) => c.id), updatedAt: new Date().toISOString() });
     }
-    setContainerIdOrder(columns.map((column) => column.id as string));
   }
   function handleDragEnd({ active, over }: DragEndEvent) {
-    if (!active || !over) return;
-    const activeItem = findItembyId(columns, active.id);
-    if (!activeItem || !over.id) {
-      setActiveId(null);
-      return;
-    }
+    if (!active || !over || !board || !user) return;
+    const activeItem = findItembyId(board.columns, active.id);
+    if (!activeItem || !over.id) return setActiveId(null);
     // check if dragged item is Column
     if ('cards' in activeItem) {
       // -------------- CREATE A NEW COLUMN ---------------
+      const newCards = activeItem.cards.map((card) => ({ ...card, id: randomId(), createdAt: new Date().toISOString() }));
       if (over.id === CREATE_NEW_ID) {
         const newColumn: ColumnInterface = {
-          ...activeItem,
-          _id: `placeholder`,
-          title: `Coppied - ${activeItem.title}`,
-          cardOrderIds: activeItem.cards.map((card, index) => `placeholder - ${index}`),
-          cards: activeItem.cards.map((card, index) => ({ ...card, _id: `placeholder - ${index}` })),
+          id: randomId(),
+          ownerId: user.id,
+          title: `${activeItem.title} - Coppied`,
+          boardId: board.id,
+          cards: newCards,
+          cardOrderIds: newCards.map((c) => c.id),
+          createdAt: new Date().toISOString(),
+          updatedAt: null,
+          _destroy: false,
         };
-        setColumns((prev) => [...prev, newColumn]);
+        editBoard({ ...board, columns: [...board.columns, newColumn], columnOrderIds: [...board.columnOrderIds, newColumn.id] });
         setHandleCreateNewItemEvent({ newColumn: newColumn, originalColumn: null, activeCard: null });
         setActiveId(null);
         return;
       }
 
       // ---------------- MOVE A COLUMN ----------------
-      setColumns((prev) => {
-        const clonedcontainers = [...prev];
-        const activeIndex = columns.findIndex((column) => column._id === active.id);
-        const overIndex = columns.findIndex((column) => column._id === over.id);
-        return arrayMove(clonedcontainers, activeIndex, overIndex);
-      });
+      const updatedBoard = { ...board };
+      const activeIndex = board.columns.findIndex((column) => column.id === active.id);
+      const overIndex = board.columns.findIndex((column) => column.id === over.id);
+      const newColumns = arrayMove(updatedBoard.columns, activeIndex, overIndex);
+      editBoard({ ...board, columns: newColumns, columnOrderIds: newColumns.map((column) => column.id) });
       setDragColumnEndEvent(true);
     }
-    // ------------------------CARD -----------------------------
-    const activeColumn = findColumnById(columns, active.id);
-    if (!activeColumn) return;
 
+    // ------------------------CARD -----------------------------
+    const activeColumn = findColumnById(board.columns, active.id);
+    if (!activeColumn) return;
     // if card is dragged to 'Create New' container
     if (over.id === CREATE_NEW_ID) {
-      const activeCard = activeItem;
+      const activeCard = activeItem as CardInterface;
       if (!activeCard || !activeColumn) return;
-      const activeCardIndex = activeColumn.cards.indexOf(activeCard as CardInterface);
-      const activeColumnIndex = columns.indexOf(activeColumn as ColumnInterface);
-      if (activeCardIndex === -1 || activeColumnIndex === -1) return;
+      const newCard: CardInterface = {
+        id: randomId(),
+        ownerId: activeCard.ownerId,
+        title: activeCard.title,
+        columnId: activeCard.columnId,
+        createdAt: new Date().toString(),
+        updatedAt: null,
+        _destroy: false,
+      };
       const newColumn: ColumnInterface = {
-        _id: 'New Column',
         id: randomId(),
         ownerId: activeItem.ownerId,
         boardId: (activeItem as ColumnInterface).boardId,
         title: 'New Column',
-        cardOrderIds: [activeCard._id as string],
-        cards: [activeCard as CardInterface],
+        cardOrderIds: [newCard.id as string],
+        cards: [newCard as CardInterface],
         _destroy: false,
         createdAt: new Date().toString(),
         updatedAt: null,
       };
-      unstable_batchedUpdates(() =>
-        setColumns((prev) => {
-          const updatedOriginalColumn = {
-            ...activeColumn,
-            cards: activeColumn.cards.filter((card) => card._id !== activeCard._id),
-          };
+      const updatedOriginalColumn: ColumnInterface = {
+        id: activeColumn.id,
+        ownerId: activeColumn.ownerId,
+        boardId: activeColumn.boardId,
+        title: activeColumn.title,
+        cards: activeColumn.cards.filter((card) => card.id !== activeCard.id),
+        cardOrderIds: activeColumn.cardOrderIds.filter((c) => c !== activeCard.id),
+        _destroy: false,
+        createdAt: activeColumn.createdAt,
+        updatedAt: new Date().toString(),
+      };
+      const updatedColumns = [...board.columns.map((c) => (c.id === updatedOriginalColumn.id ? updatedOriginalColumn : c)), newColumn];
 
-          const updatedContainers = prev.map((column, index) => (index === activeColumnIndex ? updatedOriginalColumn : column));
-          return [...updatedContainers, newColumn];
-        }),
+      unstable_batchedUpdates(() =>
+        editBoard({ ...board, columns: updatedColumns, columnOrderIds: updatedColumns.map((column) => column.id), updatedAt: new Date().toString() }),
       );
       setHandleCreateNewItemEvent({
-        originalColumn: activeColumn,
+        originalColumn: updatedOriginalColumn,
         newColumn: newColumn,
-        activeCard: { ...activeCard } as CardInterface,
+        activeCard: newCard,
       });
       setActiveId(null);
       return;
     }
     // ---------------- DELETE A Card/Column ----------------
     if (over.id === TRASH_ID) {
+      // DELETE A COLUMN
       if ('cards' in activeItem) {
-        setColumns((prev) => {
-          const clonedColumns = [...prev];
-          const filteredColumns = clonedColumns.filter((column) => column._id !== activeItem._id);
-          return filteredColumns;
-        });
-      } else {
-        setColumns((prev) =>
-          prev.map((column) => {
-            if (column._id === activeItem.columnId) {
-              return { ...column, cards: column.cards.filter((card) => card._id !== active.id) };
-            }
-            return column;
-          }),
-        );
+        const editedColumns = board.columns.filter((column) => column.id !== activeItem.id);
+        return editBoard({ ...board, columns: editedColumns, columnOrderIds: editedColumns.map((c) => c.id), updatedAt: new Date().toISOString() });
       }
+      const updatedCards = activeColumn.cards.filter((c) => c.id !== activeItem.id);
+      const updatedColumn = { ...activeColumn, cards: updatedCards, cardOrderIds: updatedCards.map((c) => c.id) };
+      editBoard({
+        ...board,
+        columns: board.columns.map((c) => (c.id === updatedColumn.id ? updatedColumn : c)),
+        updatedAt: new Date().toISOString(),
+      });
       setRequestDeletingItem(activeItem);
       setIsDraggingToTrash(false);
     }
     // ---------------- MOVE A CARD ----------------
     if ('columnId' in activeItem && activeColumn && over.id) {
-      const activeColumn = findColumnById(columns, over.id);
+      const activeColumn = findColumnById(board.columns, over.id);
       if (!activeColumn) return;
       const activeIndex = activeColumn.cards.findIndex((card) => card.id === active.id);
       const overIndex = activeColumn.cards.findIndex((card) => card.id === over.id);
-      setColumns((prev) => {
-        const clonedColumn = [...prev];
-        const activeColumnIndex = columns.findIndex((column) => column.id === activeColumn.id);
-        if (activeColumnIndex === undefined) return clonedColumn;
-        const newCardsOrder = arrayMove(clonedColumn[activeColumnIndex].cards, activeIndex, overIndex);
-        clonedColumn[activeColumnIndex].cards = newCardsOrder;
-        clonedColumn[activeColumnIndex].cardOrderIds = newCardsOrder.map((card) => card.id);
-        return clonedColumn;
-      });
-      const originalCol = columns.find((column) => column.id === activeId);
-      const movedCol = columns.find((column) => column.id === activeColumn.id);
-      if (movedCol && originalCol)
-        setDragCardEndEvent({ originalColumn: originalCol, movedColumn: movedCol, activeCard: { ...activeItem, columnId: movedCol.id } });
+      const newCardsOrder = arrayMove(activeColumn.cards, activeIndex, overIndex);
+      const updatedColumn: ColumnInterface = {
+        ...activeColumn,
+        cards: newCardsOrder,
+        cardOrderIds: newCardsOrder.map((card) => card.id),
+        updatedAt: new Date().toISOString(),
+      };
+      editBoard({ ...board, columns: board.columns.map((c) => (c.id === updatedColumn.id ? updatedColumn : c)) });
+
+      // const originalCol = columns.find((column) => column.id === activeId);
+      // const movedCol = columns.find((column) => column.id === activeColumn.id);
+      // if (movedCol && originalCol)
+      //   setDragCardEndEvent({ originalColumn: originalCol, movedColumn: movedCol, activeCard: { ...activeItem, columnId: movedCol.id } });
     }
     setActiveId(null);
   }
 
   function onDragCancel() {
-    setColumns(storeBoard?.columns ?? []);
+    editBoard(copiedBoard);
     setActiveId(null);
   }
 };

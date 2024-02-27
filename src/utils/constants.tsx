@@ -1,4 +1,4 @@
-import { BoardInterface, VisibilityTypeEnum, UserInterface } from '../types/GeneralTypes';
+import { BoardInterface, VisibilityTypeEnum, UserInterface, MarkdownInterface } from '../types/GeneralTypes';
 import { randomId } from '../hooks/GeneralHooks';
 
 export const GUEST_ID = 'guestId';
@@ -13,18 +13,18 @@ export const emptyBoard: BoardInterface = {
   memberIds: [],
   columnOrderIds: [],
   columns: [],
-  createdAt: '',
+  createdAt: new Date().toISOString(),
   updatedAt: null,
   _destroy: false,
 };
-export const emptySignUpForm: UserInterface = {
+export const emptyUserForm: UserInterface = {
   _id: '',
-  id: '',
+  id: randomId(),
   firstName: GUEST_ID,
   lastName: '',
   email: '',
   password: '',
-  createdAt: '',
+  createdAt: new Date().toISOString(),
   updatedAt: null,
 };
 
@@ -37,4 +37,14 @@ export const GuestAccount: UserInterface = {
   password: GUEST_ID,
   createdAt: new Date().toString(),
   updatedAt: null,
+};
+
+export const emptyMarkdown: MarkdownInterface = {
+  _id: '',
+  id: randomId(),
+  cardId: '',
+  content: '',
+  createdAt: new Date().toString(),
+  updatedAt: null,
+  _destroy: false,
 };

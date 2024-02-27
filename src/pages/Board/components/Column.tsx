@@ -7,7 +7,7 @@ import NewCardForm from './NewCardForm';
 import { animateLayoutChanges } from '../DnD/DnDhooks';
 import TextFieldComponent from '../../../components/TextFieldComponent';
 import { ColumnInterface } from '../../../types/GeneralTypes';
-import { useBoardContext } from '../BoardContext';
+import { boardFunctions } from '../../../hooks/boardFunctions';
 
 interface ColumnProps {
   column: ColumnInterface;
@@ -31,10 +31,9 @@ const Column = ({ column, children, dragOverlay }: ColumnProps) => {
 
   const { isDraggingToTrash, openCardDialog } = useDnD();
   const [isExpanded, setIsExpanded] = useState(false);
-  const { updateBoardFunctions } = useBoardContext();
-
+  const editColumn = boardFunctions.editColumn();
   const handleSubmit = (data: ColumnInterface) => {
-    updateBoardFunctions.editColumn(data);
+    editColumn(data);
   };
   return (
     <Box

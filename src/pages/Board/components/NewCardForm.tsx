@@ -3,8 +3,7 @@ import React, { useRef, useState } from 'react';
 import { randomId, useOutsideClick } from '../../../hooks/GeneralHooks';
 import { Send } from 'lucide-react';
 import { CardInterface, ColumnInterface, GUEST_ID } from '../../../types/GeneralTypes';
-import { useBoardContext } from '../BoardContext';
-
+import { boardFunctions } from '../../../hooks/boardFunctions';
 interface Props {
   isExpanded: boolean;
   setIsExpanded: React.Dispatch<React.SetStateAction<boolean>>;
@@ -13,8 +12,8 @@ interface Props {
 const NewCardForm = ({ isExpanded, setIsExpanded, column }: Props) => {
   const theme = useTheme();
   const textFieldRef = useRef<HTMLDivElement>(null);
-  const { updateBoardFunctions } = useBoardContext();
-  const [form, setForm] = useState<Omit<CardInterface, '_id'>>({
+  const createCard = boardFunctions.createCard();
+  const [form, setForm] = useState<CardInterface>({
     id: randomId(),
     ownerId: GUEST_ID,
     columnId: column.id,
@@ -24,7 +23,7 @@ const NewCardForm = ({ isExpanded, setIsExpanded, column }: Props) => {
     updatedAt: null,
   });
   const handlecreateNewColumn = async () => {
-    updateBoardFunctions.addNewCard(form);
+    createCard(form);
     setIsExpanded(false);
   };
 

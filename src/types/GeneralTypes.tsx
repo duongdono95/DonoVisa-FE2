@@ -84,7 +84,7 @@ export const ValidateSignInForm = z.object({
 export type SignInFormInterface = z.infer<typeof ValidateSignInForm>;
 
 export const userSchema = z.object({
-  _id: z.string(),
+  _id: z.string().optional(),
   id: z.string(),
   firstName: z.string().min(3).max(50),
   lastName: z.string().min(3).max(50),
@@ -94,3 +94,15 @@ export const userSchema = z.object({
   updatedAt: z.string().optional().nullable().default(null),
 });
 export type UserInterface = z.infer<typeof userSchema>;
+
+// -------------------------- Markdown -------------------------
+export const markdownSchema = z.object({
+  _id: z.string().optional(),
+  id: z.string(),
+  cardId: z.string(),
+  content: z.string(),
+  createdAt: z.string().optional().default(new Date().toString()),
+  updatedAt: z.string().optional().nullable().default(null),
+  _destroy: z.boolean().optional().default(false),
+});
+export type MarkdownInterface = z.infer<typeof markdownSchema>;

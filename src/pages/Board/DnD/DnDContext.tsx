@@ -1,8 +1,5 @@
-import React, { PropsWithChildren, createContext, useContext, useEffect, useState } from 'react';
-
-import { findItembyId } from './DnDhooks';
+import React, { PropsWithChildren, createContext, useContext, useState } from 'react';
 import { CardInterface, ColumnInterface } from '../../../types/GeneralTypes';
-import { useBoardContext } from '../BoardContext';
 
 interface DnDContextInterface {
   activeId: string | null;
@@ -11,8 +8,6 @@ interface DnDContextInterface {
   setActiveItem: React.Dispatch<React.SetStateAction<ColumnInterface | CardInterface | null>>;
   isDraggingToTrash: boolean;
   setIsDraggingToTrash: (isDragging: boolean) => void;
-  isSortingColumn: boolean | null;
-  setIsSortingColumn: React.Dispatch<React.SetStateAction<boolean | null>>;
   requestDeletingItem: ColumnInterface | CardInterface | null;
   setRequestDeletingItem: React.Dispatch<React.SetStateAction<ColumnInterface | CardInterface | null>>;
   dragColumnEndEvent: boolean | null;
@@ -41,8 +36,6 @@ interface DnDContextInterface {
       activeCard: CardInterface | null;
     } | null>
   >;
-  openCardDialog: boolean;
-  setOpenCardDialog: React.Dispatch<React.SetStateAction<boolean>>;
 }
 export const DnDContext = createContext<DnDContextInterface>({
   activeId: null,
@@ -53,9 +46,6 @@ export const DnDContext = createContext<DnDContextInterface>({
 
   isDraggingToTrash: false,
   setIsDraggingToTrash: () => {},
-
-  isSortingColumn: null,
-  setIsSortingColumn: () => {},
 
   requestDeletingItem: null,
   setRequestDeletingItem: () => {},
@@ -68,19 +58,13 @@ export const DnDContext = createContext<DnDContextInterface>({
 
   handleCreateNewItemEvent: null,
   setHandleCreateNewItemEvent: () => {},
-
-  openCardDialog: false,
-  setOpenCardDialog: () => {},
 });
 
 export const DnDcontextProvider = ({ children }: PropsWithChildren<object>) => {
-  const { board } = useBoardContext();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [activeItem, setActiveItem] = useState<ColumnInterface | CardInterface | null>(null);
 
   const [isDraggingToTrash, setIsDraggingToTrash] = useState<boolean>(false);
-
-  const [isSortingColumn, setIsSortingColumn] = useState<boolean | null>(null);
 
   const [requestDeletingItem, setRequestDeletingItem] = useState<ColumnInterface | CardInterface | null>(null);
 
@@ -97,8 +81,6 @@ export const DnDcontextProvider = ({ children }: PropsWithChildren<object>) => {
     activeCard: CardInterface | null;
   } | null>(null);
 
-  const [openCardDialog, setOpenCardDialog] = useState(false);
-
   const contextValue = {
     activeId,
     setActiveId,
@@ -106,8 +88,6 @@ export const DnDcontextProvider = ({ children }: PropsWithChildren<object>) => {
     setActiveItem,
     isDraggingToTrash,
     setIsDraggingToTrash,
-    isSortingColumn,
-    setIsSortingColumn,
     requestDeletingItem,
     setRequestDeletingItem,
     dragColumnEndEvent,
@@ -116,25 +96,8 @@ export const DnDcontextProvider = ({ children }: PropsWithChildren<object>) => {
     setDragCardEndEvent,
     handleCreateNewItemEvent,
     setHandleCreateNewItemEvent,
-    openCardDialog,
-    setOpenCardDialog,
   };
 
-  useEffect(() => {
-    if (activeId !== null) {
-      setActiveItem(board && findItembyId(board.columns, activeId));
-    } else {
-      setActiveItem(null);
-    }
-  }, [activeId, board]);
-
-  useEffect(() => {
-    if (activeItem && 'cards' in activeItem) {
-      setIsSortingColumn(true);
-    } else {
-      setIsSortingColumn(false);
-    }
-  }, [activeItem]);
   return <DnDContext.Provider value={contextValue}>{children}</DnDContext.Provider>;
 };
 

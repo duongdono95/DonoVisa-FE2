@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import '@mdxeditor/editor/style.css';
 import {
   MDXEditor,
@@ -16,22 +16,24 @@ import {
 } from '@mdxeditor/editor';
 import { Box } from '@mui/material';
 import { toast } from 'react-toastify';
+import { MarkdownInterface } from '../types/GeneralTypes';
 
 interface Props {
-  handleMarkdown: React.Dispatch<React.SetStateAction<string>>;
+  markdown: MarkdownInterface;
+  setMarkdown: React.Dispatch<React.SetStateAction<MarkdownInterface>>;
 }
-const Markdown = ({ handleMarkdown }: Props) => {
-  const [markdown, setMarkdown] = useState('');
+const Markdown = ({ markdown, setMarkdown }: Props) => {
   const handleMarkdownChange = (newMarkdown: string) => {
-    setMarkdown(newMarkdown);
-    handleMarkdown(newMarkdown);
+    setMarkdown((prev) => {
+      return { ...prev, content: newMarkdown, updatedAt: new Date().toISOString() };
+    });
   };
   const convertImageToBase64 = (file: File) => {
     return new Promise((resolve, reject) => {
-      const maxFileSize = 50 * 1024 * 1024;
+      const maxFileSize = 5 * 1024 * 1024;
       if (file.size > maxFileSize) {
-        reject('File size exceeds the 50MB limit.');
-        toast.error('File size exceeds the 50MB limit.');
+        reject('File size exceeds the 5MB limit.');
+        toast.error('File size exceeds the 5MB limit.');
         return;
       }
       const reader = new FileReader();
@@ -43,8 +45,7 @@ const Markdown = ({ handleMarkdown }: Props) => {
 
   return (
     <MDXEditor
-      // className={'mdx-editor'}
-      markdown={markdown}
+      markdown={markdown?.content ?? ''}
       onChange={handleMarkdownChange}
       autoFocus
       plugins={[

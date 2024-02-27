@@ -1,0 +1,23 @@
+.AuthPage {
+  position: relative;
+  max-width: 100vw;
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  .bright-mode {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+  }
+  .google-logo {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/2048px-Google_%22G%22_logo.svg.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+}

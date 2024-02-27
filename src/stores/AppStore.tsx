@@ -1,16 +1,17 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import { UserInterface } from '../types/GeneralTypes';
+import { GuestAccount } from '../utils/constants';
 
 interface AppState {
   appBarHeight: number;
   boardBarHeight: number;
-  user: UserInterface | null;
+  user: UserInterface;
 }
 interface AppSetState {
   setAppBarHeight: (height: number) => void;
   setBoardBarHeight: (height: number) => void;
-  setUser: (user: UserInterface | null) => void;
+  setUser: (user: UserInterface) => void;
 }
 
 export const useAppStore = create<AppState & AppSetState>()(
@@ -23,7 +24,7 @@ export const useAppStore = create<AppState & AppSetState>()(
         boardBarHeight: 0,
         setBoardBarHeight: (height) => set(() => ({ boardBarHeight: height })),
         // --------------------------------------------------------------------
-        user: null,
+        user: GuestAccount,
         setUser: (userData) => set(() => ({ user: userData })),
       }),
       { name: 'DonoVista App Store' },

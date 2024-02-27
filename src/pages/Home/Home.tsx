@@ -1,22 +1,31 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Box, Button, Grow, TextField, useTheme } from '@mui/material';
 import './Home.scss';
 import BrightModeToggle from '../../components/BrightModeToggle';
 import { Club, Home as HomeIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../../stores/AppStore';
-import { GuestAccount } from '../../utils/constants';
+import { GUEST_ID } from '../../types/GeneralTypes';
+import { z } from 'zod';
 export default function Home() {
   const theme = useTheme();
   const [state, setState] = useState<'instroduction' | 'features'>('instroduction');
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
-  const [setUser, user] = useAppStore((state) => [state.setUser, state.user]);
-
+  const [user] = useAppStore((state) => [state.user]);
+  const [invalidEmail, setInvalidEmail] = useState<string | null>(null);
+  const validateEmail = () => {
+    const validator = z.string().email({ message: 'Invalid email' });
+    const validatedEmail = validator.safeParse(email);
+    if (!validatedEmail.success) return setInvalidEmail(validatedEmail.error.errors[0].message);
+    return navigate('/sign-up', { state: { email: email } });
+  };
   return (
     <div className="Home">
       <div className="bright-mode" style={{ display: 'flex', alignItems: 'center', gap: '10px', opacity: 0.7 }}>
-        <p>Sign In</p>
+        <Button onClick={() => navigate('/sign-in')}>
+          {user.firstName === GUEST_ID ? 'Sign In' : `Welcome Back, ${user.firstName} ${user.lastName}`}
+        </Button>
         <BrightModeToggle />
       </div>
 
@@ -50,19 +59,34 @@ export default function Home() {
             <p>WEBSITE AND TOOLS FOR PROJECT MANAGEMENT</p>
             <h1>Ensure timely and budget-friendly project completion.</h1>
             <p>Explore DonoVista now</p>
-            <TextField type="email" placeholder=" Type your Email ..." />
-            <Button variant="contained" color="primary">
-              Get Started
-            </Button>
-            <Button
-              variant="outlined"
-              onClick={() => {
-                navigate('/boards');
-                !user && setUser(GuestAccount);
-              }}
-            >
-              Continue as GUEST !
-            </Button>
+            {user.firstName === GUEST_ID && (
+              <TextField
+                error={invalidEmail ? true : false}
+                helperText={invalidEmail}
+                required
+                type="email"
+                placeholder=" Type your Email ..."
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            )}
+            {user.firstName === GUEST_ID && (
+              <Button variant="contained" color="primary" disabled={email.length === 0 ? true : false} onClick={validateEmail}>
+                Sign Up with us
+              </Button>
+            )}
+            {user.firstName === GUEST_ID ? (
+              <Button
+                variant="outlined"
+                onClick={() => {
+                  navigate('/boards');
+                }}
+              >
+                Continue as GUEST !
+              </Button>
+            ) : (
+              <Button onClick={() => navigate('/boards')}>Visit uour Workspaces</Button>
+            )}
           </div>
           <div className="hero-img"></div>
         </div>

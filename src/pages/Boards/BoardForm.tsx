@@ -1,14 +1,12 @@
 import React, { useEffect, useState } from 'react';
-
 import { Button, MenuItem, TextField, useTheme } from '@mui/material';
 import { FolderLock, Unlock, Lock } from 'lucide-react';
-
 import { BoardInterface, BoardSchema, VisibilityTypeEnum } from '../../types/GeneralTypes';
 import { useAppStore } from '../../stores/AppStore';
 import { emptyBoard } from '../../utils/constants';
-import { slugify } from '../../hooks/GeneralHooks';
 import { useNavigate } from 'react-router-dom';
-import { useBoardsStore } from '../../stores/BoardsStore';
+import { boardFunctions } from '../../hooks/boardFunctions';
+import { slugify } from '../../hooks/GeneralHooks';
 interface Props {
   board: BoardInterface | null;
   type: 'edit' | 'create' | 'confirmDelete' | null;
@@ -16,8 +14,10 @@ interface Props {
 }
 const BoardForm = ({ board, type, setOpenDialog }: Props) => {
   const navigate = useNavigate();
+  const createBoard = boardFunctions.createBoard();
+  const updateBoard = boardFunctions.updateBoard();
   const [user] = useAppStore((state) => [state.user]);
-  const [storeBoardList, setStoreBoardList] = useBoardsStore((state) => [state.storeBoardList, state.setStoreBoardList]);
+
   const [localBoard, setLocalBoard] = useState<BoardInterface>(board ?? { ...emptyBoard, ownerId: user?.id ?? '' });
   const [error, setError] = useState<{ path: string; message: string }>({ path: '', message: '' });
   const theme = useTheme();
@@ -30,9 +30,7 @@ const BoardForm = ({ board, type, setOpenDialog }: Props) => {
         message: validatedBoard.error.errors[0].message,
       });
     }
-    const clonedBoards = [...storeBoardList];
-    clonedBoards.push({ ...validatedBoard.data, slug: slugify(validatedBoard.data.title) });
-    setStoreBoardList(clonedBoards);
+    createBoard({ ...validatedBoard.data, slug: slugify(validatedBoard.data.title) });
     setOpenDialog(false);
   };
   const handleUpdateBoard = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -44,10 +42,7 @@ const BoardForm = ({ board, type, setOpenDialog }: Props) => {
         message: validatedBoard.error.errors[0].message,
       });
     }
-    const clonedBoards = [...storeBoardList];
-    const boardIndex = clonedBoards.findIndex((b) => b.id === validatedBoard.data.id);
-    clonedBoards[boardIndex] = validatedBoard.data;
-    setStoreBoardList(clonedBoards);
+    updateBoard(validatedBoard.data);
     setOpenDialog(false);
   };
 

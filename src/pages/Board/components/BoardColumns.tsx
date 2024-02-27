@@ -10,7 +10,7 @@ import { CardInterface, ColumnInterface } from '../../../types/GeneralTypes';
 import { useDnD } from '../DnD/DnDContext';
 import { dropAnimation } from '../DnD/DnDhooks';
 import DroppableContainer from '../DnD/DroppableContainer';
-import { useBoardContext } from '../BoardContext';
+import { useBoardsStore } from '../../../stores/BoardsStore';
 
 interface Props {
   boardBarHeight: number;
@@ -18,7 +18,7 @@ interface Props {
 
 const BoardColumns = ({ boardBarHeight }: Props) => {
   const { activeItem, isDraggingToTrash } = useDnD();
-  const { board } = useBoardContext();
+  const [board] = useBoardsStore((state) => [state.board]);
   return (
     board && (
       <Box
@@ -27,7 +27,7 @@ const BoardColumns = ({ boardBarHeight }: Props) => {
           padding: `${boardBarHeight + 20}px 3% 3% 3%`,
         }}
       >
-        <DroppableContainer vertical={false}>
+        <DroppableContainer board={board} vertical={false}>
           <Box className={'column-group'} sx={{ display: 'flex', gap: '2%' }}>
             {board.columns.map((column, index) => {
               return (

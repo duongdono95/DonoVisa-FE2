@@ -1,19 +1,22 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Box, useTheme } from '@mui/material';
 import { CSS } from '@dnd-kit/utilities';
 import { useSortable } from '@dnd-kit/sortable';
 import { useDnD } from '../DnD/DnDContext';
 import TextFieldComponent from '../../../components/TextFieldComponent';
 import MarkdownCard from './MarkdownCard';
-import { CardInterface } from '../../../types/GeneralTypes';
-import { useBoardContext } from '../BoardContext';
+import { CardInterface, MarkdownInterface } from '../../../types/GeneralTypes';
+import { boardFunctions } from '../../../hooks/boardFunctions';
+import { Edit } from 'lucide-react';
+import { useMarkdownStore } from '../../../stores/MarkdownStore';
 interface CardProps {
   card: CardInterface;
   dragOverlay?: boolean;
 }
 const Card = ({ dragOverlay, card }: CardProps) => {
   const theme = useTheme();
-  const { isSortingColumn, isDraggingToTrash, openCardDialog, setOpenCardDialog } = useDnD();
+  const [markdownList] = useMarkdownStore((state) => [state.markdownList]);
+  const { activeItem, isDraggingToTrash } = useDnD();
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: card.id as string,
     data: card as CardInterface,
@@ -23,11 +26,18 @@ const Card = ({ dragOverlay, card }: CardProps) => {
     transition,
     opacity: isDragging ? 0.5 : undefined,
   };
-  const { updateBoardFunctions } = useBoardContext();
+  const editCard = boardFunctions.editCard();
   const handleSubmit = (data: CardInterface) => {
-    updateBoardFunctions.editCard(data);
+    editCard(data);
   };
-
+  const [openCardDialog, setOpenCardDialog] = useState(false);
+  const [cardMarkdown, setCardMarkdown] = useState<MarkdownInterface>();
+  useEffect(() => {
+    if (markdownList.length > 0) {
+      const md = markdownList.find((markdown) => markdown.cardId === card.id);
+      if (md) setCardMarkdown(md);
+    }
+  }, [markdownList]);
   return (
     <Box
       className={`${dragOverlay ? (theme.palette.mode === 'dark' ? 'card card-dragging-effect-light' : 'card card-dragging-effect-dark') : 'card'}`}
@@ -48,28 +58,27 @@ const Card = ({ dragOverlay, card }: CardProps) => {
             : undefined,
         transform: isDraggingToTrash && dragOverlay ? 'scale(0.5)' : undefined,
       }}
-      ref={isSortingColumn ? undefined : setNodeRef}
+      ref={activeItem && 'cards' in activeItem ? undefined : setNodeRef}
       style={dndKitCardStyles}
       {...attributes}
       {...(openCardDialog ? undefined : listeners)}
     >
-      <Box sx={{ padding: '10px' }} onClick={() => setOpenCardDialog(true)}>
+      <Box sx={{ display: 'flex', alignItems: 'center', padding: '10px' }}>
         <TextFieldComponent data={card} handleSubmit={handleSubmit} />
-        {/* {card.coverImgUrl && (
-          <Box
-            sx={{
-              backgroundImage: `url(${card.coverImgUrl})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              width: '100%',
-              height: '120px',
-              borderRadius: '5px',
-              marginTop: '10px',
-            }}
-          ></Box>
-        )} */}
+        <Edit
+          onClick={(e) => {
+            e.stopPropagation();
+            setOpenCardDialog(true);
+          }}
+        />
       </Box>
-      <MarkdownCard card={card} handleSubmit={handleSubmit} />
+      <MarkdownCard
+        card={card}
+        cardMarkdown={cardMarkdown}
+        handleSubmit={handleSubmit}
+        openCardDialog={openCardDialog}
+        setOpenCardDialog={setOpenCardDialog}
+      />
     </Box>
   );
 };

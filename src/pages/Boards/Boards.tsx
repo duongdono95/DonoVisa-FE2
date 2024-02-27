@@ -13,7 +13,7 @@ import BoardForm from './BoardForm';
 import { useBoardsStore } from '../../stores/BoardsStore';
 const Boards = () => {
   const [appBarHeight, user] = useAppStore((state) => [state.appBarHeight, state.user]);
-  const [storeBoardList] = useBoardsStore((state) => [state.storeBoardList]);
+  const [boardList] = useBoardsStore((state) => [state.boardList]);
   const theme = useTheme();
   const navigate = useNavigate();
   const [boardMenu, setBoardMenu] = React.useState<null | HTMLElement>(null);
@@ -56,7 +56,7 @@ const Boards = () => {
             Create New Board
           </Button>
           <div className="board-list">
-            {storeBoardList.map((board, index) => (
+            {boardList.map((board, index) => (
               <Box
                 key={index}
                 className="board"

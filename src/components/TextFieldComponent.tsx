@@ -32,6 +32,7 @@ const TextFieldComponent = ({ data, handleSubmit, fontSize }: Props) => {
         alignItems: 'center',
         justifyContent: 'center',
         overflow: 'hidden',
+        flexGrow: 1,
       }}
     >
       <TextField
@@ -56,7 +57,10 @@ const TextFieldComponent = ({ data, handleSubmit, fontSize }: Props) => {
             return { ...prev, title: e.target.value };
           })
         }
-        onDoubleClick={() => setReadOnly(false)}
+        onDoubleClick={(e) => {
+          e.stopPropagation();
+          setReadOnly(false);
+        }}
         onKeyDown={(e) => {
           e.key === 'Enter' && submit();
           e.key === 'Escape' && setReadOnly(true);

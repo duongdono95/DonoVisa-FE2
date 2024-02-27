@@ -1,9 +1,11 @@
 import { Box, IconButton, TextField } from '@mui/material';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { randomId, useOutsideClick } from '../../../hooks/GeneralHooks';
 import { Send } from 'lucide-react';
-import { useBoardContext } from '../BoardContext';
-import { ColumnInterface, GUEST_ID } from '../../../types/GeneralTypes';
+import { ColumnInterface, ColumnSchema, GUEST_ID } from '../../../types/GeneralTypes';
+import { useBoardsStore } from '../../../stores/BoardsStore';
+import { boardFunctions } from '../../../hooks/boardFunctions';
+import { toast } from 'react-toastify';
 
 interface Props {
   isExpanded: boolean;
@@ -11,8 +13,9 @@ interface Props {
 }
 const NewColumnForm = ({ isExpanded, setIsExpanded }: Props) => {
   const textFieldRef = useRef<HTMLDivElement>(null);
-  const { board } = useBoardContext();
-  const [form, setForm] = useState<Omit<ColumnInterface, '_id'>>({
+  const [board] = useBoardsStore((state) => [state.board]);
+  const createColumn = boardFunctions.createColumn();
+  const [form, setForm] = useState<ColumnInterface>({
     id: randomId(),
     ownerId: GUEST_ID,
     boardId: board?.id ?? '',
@@ -23,14 +26,16 @@ const NewColumnForm = ({ isExpanded, setIsExpanded }: Props) => {
     cards: [],
     cardOrderIds: [],
   });
-  const { updateBoardFunctions } = useBoardContext();
   const handleCreateNewColumn = async () => {
-    updateBoardFunctions.addNewColumn(form);
+    const validatedForm = ColumnSchema.safeParse(form);
+    if (!validatedForm.success) return toast.error(validatedForm.error.errors[0].message);
+    createColumn(validatedForm.data);
     setIsExpanded(false);
   };
   useOutsideClick(textFieldRef, () => {
     if (isExpanded) setIsExpanded(false);
   });
+
   return (
     <Box ref={textFieldRef} sx={{ display: 'flex', alignItems: 'center', width: '100%', padding: '10px' }}>
       <TextField

@@ -4,14 +4,12 @@ import { Box, useTheme } from '@mui/material';
 import { useSortable } from '@dnd-kit/sortable';
 import { Trash2 } from 'lucide-react';
 import { TRASH_ID } from '../DnD/DroppableContainer';
-import { useBoardContext } from '../BoardContext';
 
 const BoardTrashBin = () => {
   const { attributes, listeners, setNodeRef, isOver } = useSortable({
     id: TRASH_ID,
   });
   const theme = useTheme();
-  const { updateBoardFunctions } = useBoardContext();
 
   return (
     <Box

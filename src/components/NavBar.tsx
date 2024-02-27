@@ -4,7 +4,6 @@ import { useAppStore } from '../stores/AppStore';
 import Logo2 from '../assets/Logo2';
 import { LogOut, Search, User2 } from 'lucide-react';
 import { GUEST_ID } from '../types/GeneralTypes';
-import { GuestAccount } from '../utils/constants';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import BrightModeToggle from './BrightModeToggle';
@@ -12,7 +11,7 @@ import BrightModeToggle from './BrightModeToggle';
 const NavBar = () => {
   const theme = useTheme();
   const appBarRef = useRef<HTMLDivElement>(null);
-  const [user, setUser] = useAppStore((state) => [state.user, state.setUser]);
+  const [user] = useAppStore((state) => [state.user]);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   return (
@@ -60,7 +59,6 @@ const NavBar = () => {
                   </MenuItem>
                   <MenuItem
                     onClick={() => {
-                      setUser(GuestAccount);
                       queryClient.invalidateQueries({ queryKey: ['boards'] });
                       navigate('/');
                     }}

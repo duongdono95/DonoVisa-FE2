@@ -1,9 +1,10 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from '../pages/Home/Home';
-import Auth from '../pages/Auth/Auth';
+
 import Boards from '../pages/Boards/Boards';
 import Board from '../pages/Board/Board';
+import Auth from '../pages/Auth/Auth';
 
 export default function AppRouter() {
   return (

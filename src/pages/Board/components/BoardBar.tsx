@@ -9,12 +9,12 @@ import { useBoardsStore } from '../../../stores/BoardsStore';
 
 const BoardBar = () => {
   const theme = useTheme();
-  const [storeBoard, setStoreBoard] = useBoardsStore((state) => [state.storeBoard, state.setStoreBoard]);
+  const [board, setBoard] = useBoardsStore((state) => [state.board, state.setBoard]);
   const boardBarRef = useRef<HTMLDivElement>(null);
   const boardBarHeight = useDivSizeThroughRef(boardBarRef, 'height');
   const [setBoardBarHeight] = useAppStore((state) => [state.setBoardBarHeight]);
   const [user] = useAppStore((state) => [state.user]);
-  const [localBoard, setLocalBoard] = useState(storeBoard);
+  const [localBoard, setLocalBoard] = useState(board);
   const [isStarred, setIsStarred] = useState(false);
   const [isReadOnly, setIsReadOnly] = useState(true);
 
@@ -28,11 +28,11 @@ const BoardBar = () => {
   }, [boardBarHeight, setBoardBarHeight]);
 
   useEffect(() => {
-    setLocalBoard(storeBoard);
-  }, [storeBoard]);
+    setLocalBoard(board);
+  }, [board]);
   useEffect(() => {
     if (localBoard) {
-      setStoreBoard(localBoard);
+      setBoard(localBoard);
     }
   }, [localBoard]);
   return (

@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import './Board.scss';
 import { useAppStore } from '../../stores/AppStore';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import NavBar from '../../components/NavBar';
 import BoardDrawer from './components/BoardDrawer';
 import BoardBar from './components/BoardBar';
@@ -11,17 +11,19 @@ import { useBoardsStore } from '../../stores/BoardsStore';
 
 const Board = () => {
   const navigate = useNavigate();
-  const [setStoreBoard, storeBoardList] = useBoardsStore((state) => [state.setStoreBoard, state.storeBoardList]);
+  const [setBoard, boardList, board] = useBoardsStore((state) => [state.setBoard, state.boardList, state.board]);
+  const { state } = useLocation();
   const [appBarHeight, boardBarHeight, user] = useAppStore((state) => [state.appBarHeight, state.boardBarHeight, state.user]);
   useEffect(() => {
-    if (!user) navigate(-1);
-  }, [user]);
+    if (!user || !boardList[0]) navigate(-1);
+  }, [user, boardList[0]]);
   useEffect(() => {
-    if (storeBoardList[0]) {
-      setStoreBoard(storeBoardList[0]);
+    if (boardList) {
+      const board = boardList.find((b) => b.id === state.boardId);
+      if (!board) return navigate(-1);
+      setBoard(board);
     }
-  }, [storeBoardList]);
-
+  }, [boardList]);
   return (
     <div className="board-page">
       <NavBar />
