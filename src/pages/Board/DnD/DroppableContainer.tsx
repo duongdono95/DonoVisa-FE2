@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import {
   DndContext,
   DragEndEvent,
@@ -8,7 +8,6 @@ import {
   MouseSensor,
   TouchSensor,
   UniqueIdentifier,
-  closestCenter,
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
@@ -114,7 +113,7 @@ const DroppableContainer = ({ children, vertical, board }: Props) => {
       clonedcontainers[activeColumnIndex] = {
         ...activeColumn,
         cards: activeColumn.cards.filter((card) => card.id !== active.id),
-        // cardOrderIds: activeColumn.cardOrderIds.filter((id) => id !== active.id),
+        cardOrderIds: activeColumn.cardOrderIds.filter((id) => id !== active.id),
       };
       clonedcontainers[overColumnIndex] = {
         ...overColumn,
@@ -123,13 +122,14 @@ const DroppableContainer = ({ children, vertical, board }: Props) => {
           ...activeColumn.cards.filter((card) => card.id === active.id),
           ...overColumn.cards.slice(newCardIndex),
         ],
-        // cardOrderIds: [...clonedcontainers[overColumnIndex].cardOrderIds, active.id.toString()],
+        cardOrderIds: [...clonedcontainers[overColumnIndex].cardOrderIds, active.id.toString()],
       };
       editBoard({ ...board, columns: clonedcontainers, columnOrderIds: clonedcontainers.map((c) => c.id), updatedAt: new Date().toISOString() });
     }
   }
   function handleDragEnd({ active, over }: DragEndEvent) {
     if (!active || !over || !board || !user) return;
+    console.log(startedColumn);
     const activeItem = findItembyId(board.columns, active.id);
     if (!activeItem || !over.id) return setActiveId(null);
     // check if dragged item is Column
@@ -170,9 +170,10 @@ const DroppableContainer = ({ children, vertical, board }: Props) => {
     // if card is dragged to 'Create New' container
     if (over.id === CREATE_NEW_ID) {
       const activeCard = activeItem as CardInterface;
-      if (!activeCard || !activeColumn) return;
-      const newCard: CardInterface = {
-        id: randomId(),
+      if (!activeCard || !activeColumn || !startedColumn || startedColumn === null) return;
+
+      const movedCard: CardInterface = {
+        id: activeCard.id,
         ownerId: activeCard.ownerId,
         title: activeCard.title,
         columnId: activeCard.columnId,
@@ -186,13 +187,13 @@ const DroppableContainer = ({ children, vertical, board }: Props) => {
         ownerId: activeItem.ownerId,
         boardId: (activeItem as ColumnInterface).boardId,
         title: 'New Column',
-        cardOrderIds: [newCard.id as string],
-        cards: [newCard],
+        cardOrderIds: [movedCard.id as string],
+        cards: [movedCard],
         _destroy: false,
         createdAt: new Date().toString(),
         updatedAt: null,
       };
-      const updatedOriginalColumn: ColumnInterface = {
+      const updateHoverCol: ColumnInterface = {
         id: activeColumn.id,
         ownerId: activeColumn.ownerId,
         boardId: activeColumn.boardId,
@@ -203,21 +204,22 @@ const DroppableContainer = ({ children, vertical, board }: Props) => {
         createdAt: activeColumn.createdAt,
         updatedAt: new Date().toString(),
       };
-      console.log(newCard.id);
-      console.log(newColumn.id);
       const updatedColumns = [
-        ...board.columns.map((c) => (c.id === updatedOriginalColumn.id ? updatedOriginalColumn : c)),
-        { ...newColumn, cards: [{ ...newCard, columnId: newColumn.id }] },
+        ...board.columns.map((c) => (c.id === updateHoverCol.id ? updateHoverCol : c)),
+        { ...newColumn, cards: [{ ...movedCard, columnId: newColumn.id }] },
       ];
 
       unstable_batchedUpdates(() =>
         editBoard({ ...board, columns: updatedColumns, columnOrderIds: updatedColumns.map((column) => column.id), updatedAt: new Date().toString() }),
       );
-      setHandleCreateNewItemEvent({
-        originalColumn: updatedOriginalColumn,
-        newColumn: newColumn,
-        activeCard: { ...newCard, columnId: newColumn.id },
-      });
+
+      const originalCol = board.columns.find((c) => c.id === startedColumn.id);
+      originalCol &&
+        setHandleCreateNewItemEvent({
+          originalColumn: originalCol,
+          newColumn: newColumn,
+          activeCard: { ...movedCard, columnId: newColumn.id },
+        });
       setActiveId(null);
 
       return;
