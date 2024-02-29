@@ -8,6 +8,7 @@ import { useAppStore } from '../../stores/AppStore';
 import { GUEST_ID } from '../../types/GeneralTypes';
 import { z } from 'zod';
 import { useBoardsStore } from '../../stores/BoardsStore';
+import { useMutation } from '@tanstack/react-query';
 export default function Home() {
   const theme = useTheme();
   const [state, setState] = useState<'instroduction' | 'features'>('instroduction');
@@ -16,12 +17,14 @@ export default function Home() {
   const [user] = useAppStore((state) => [state.user]);
   const [invalidEmail, setInvalidEmail] = useState<string | null>(null);
   const [boardList] = useBoardsStore((state) => [state.boardList]);
+
   const validateEmail = () => {
     const validator = z.string().email({ message: 'Invalid email' });
     const validatedEmail = validator.safeParse(email);
     if (!validatedEmail.success) return setInvalidEmail(validatedEmail.error.errors[0].message);
     return navigate('/sign-up', { state: { email: email } });
   };
+
   return (
     <div className="Home">
       <div className="bright-mode" style={{ display: 'flex', alignItems: 'center', gap: '10px', opacity: 0.7 }}>

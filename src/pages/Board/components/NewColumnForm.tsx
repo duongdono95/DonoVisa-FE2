@@ -4,8 +4,10 @@ import { randomId, useOutsideClick } from '../../../hooks/GeneralHooks';
 import { Send } from 'lucide-react';
 import { ColumnInterface, ColumnSchema, GUEST_ID } from '../../../types/GeneralTypes';
 import { useBoardsStore } from '../../../stores/BoardsStore';
-import { boardFunctions } from '../../../hooks/boardFunctions';
 import { toast } from 'react-toastify';
+import { useAppStore } from '../../../stores/AppStore';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { API_createColumn } from '../../../hooks/API_functions';
 
 interface Props {
   isExpanded: boolean;
@@ -13,11 +15,12 @@ interface Props {
 }
 const NewColumnForm = ({ isExpanded, setIsExpanded }: Props) => {
   const textFieldRef = useRef<HTMLDivElement>(null);
-  const [board] = useBoardsStore((state) => [state.board]);
-  const createColumn = boardFunctions.CreateColumn();
+  const queryClient = useQueryClient();
+  const [user] = useAppStore((state) => [state.user]);
+  const [board, addColumn] = useBoardsStore((state) => [state.board, state.addColumn]);
   const [form, setForm] = useState<ColumnInterface>({
     id: randomId(),
-    ownerId: GUEST_ID,
+    ownerId: user.id,
     boardId: board?.id ?? '',
     title: 'Column Title ...',
     createdAt: '',
@@ -26,10 +29,25 @@ const NewColumnForm = ({ isExpanded, setIsExpanded }: Props) => {
     cards: [],
     cardOrderIds: [],
   });
+
+  const createColMutation = useMutation({
+    mutationFn: (col: ColumnInterface) => API_createColumn(col),
+    onSuccess: (result) => {
+      if (result.code === 200) {
+        addColumn(result.data);
+        queryClient.invalidateQueries({ queryKey: ['board'] });
+      }
+    },
+    onError: (err) => {
+      console.log(err);
+      toast.error('Creating New Column Failed');
+    },
+  });
   const handleCreateNewColumn = async () => {
     const validatedForm = ColumnSchema.safeParse(form);
     if (!validatedForm.success) return toast.error(validatedForm.error.errors[0].message);
-    createColumn(validatedForm.data);
+    if (user.firstName === GUEST_ID) addColumn(validatedForm.data);
+    if (user.firstName !== GUEST_ID && user._id) createColMutation.mutate(validatedForm.data);
     setIsExpanded(false);
   };
   useOutsideClick(textFieldRef, () => {

@@ -1,7 +1,10 @@
 import React from 'react';
 import { Button } from '@mui/material';
-import { BoardInterface } from '../../types/GeneralTypes';
-import { boardFunctions } from '../../hooks/boardFunctions';
+import { BoardInterface, GUEST_ID } from '../../types/GeneralTypes';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { API_deleteBoard } from '../../hooks/API_functions';
+import { useAppStore } from '../../stores/AppStore';
+import { useBoardsStore } from '../../stores/BoardsStore';
 
 interface Props {
   board: BoardInterface | null;
@@ -10,15 +13,28 @@ interface Props {
 }
 
 export default function DeleteBoard({ board, setOpenDialog, setBoardMenu }: Props) {
-  const deleteBoard = boardFunctions.DeleteBoard();
-  const handledeleteBoard_API = async () => {
-    if (!board) return;
-    deleteBoard(board);
+  const [user] = useAppStore((state) => [state.user]);
+  const [deleteBoard, setBoard, boardList] = useBoardsStore((state) => [state.deleteBoard, state.setBoard, state.boardList]);
+  const queryClient = useQueryClient();
+  const deleteMutation = useMutation({
+    mutationFn: (_id: string) => API_deleteBoard(_id),
+    onSuccess: (result) => result.code === 200 && queryClient.invalidateQueries({ queryKey: ['boards'] }),
+    onError: (err) => console.log(err),
+  });
+  const handledeleteBoard = () => {
+    if (!board || !user) return;
+    if (user._id === GUEST_ID) {
+      deleteBoard(board);
+    }
+    if (user._id !== GUEST_ID && board._id) {
+      deleteBoard(board);
+      setBoard(null);
+      deleteMutation.mutate(board._id);
+    }
     // --------------------------------------------------------------------- //
     setOpenDialog(false);
     setBoardMenu(null);
   };
-
   return (
     board && (
       <div className={'board-confirm-deletion-modal'}>
@@ -33,7 +49,7 @@ export default function DeleteBoard({ board, setOpenDialog, setBoardMenu }: Prop
           <Button variant={'outlined'} onClick={() => setOpenDialog(false)}>
             Cancel
           </Button>
-          <Button color={'secondary'} onClick={handledeleteBoard_API}>
+          <Button color={'secondary'} onClick={handledeleteBoard}>
             Delete
           </Button>
         </div>

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Box, Button, FormControl, IconButton, TextField, useTheme } from '@mui/material';
 import { Eye, EyeOff } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import GoogleButton from '../pages/Auth/components/GoogleButton';
+import GoogleButton from './GoogleButton';
 import { SignInFormInterface, UserInterface, ValidateSignInForm, userSchema } from '../types/GeneralTypes';
 import { emptyUserForm } from '../utils/constants';
 import { userFunctions } from '../hooks/userFunctions';

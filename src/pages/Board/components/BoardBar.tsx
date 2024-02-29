@@ -3,9 +3,11 @@ import { Star, UserPlus } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import { CrownBadge, useDivSizeThroughRef } from '../../../hooks/GeneralHooks';
 import { toast } from 'react-toastify';
-import { GUEST_ID } from '../../../types/GeneralTypes';
+import { BoardInterface, GUEST_ID } from '../../../types/GeneralTypes';
 import { useAppStore } from '../../../stores/AppStore';
 import { useBoardsStore } from '../../../stores/BoardsStore';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { API_updateBoard } from '../../../hooks/API_functions';
 
 const BoardBar = () => {
   const theme = useTheme();
@@ -17,7 +19,7 @@ const BoardBar = () => {
   const [localBoard, setLocalBoard] = useState(board);
   const [isStarred, setIsStarred] = useState(false);
   const [isReadOnly, setIsReadOnly] = useState(true);
-
+  const queryClient = useQueryClient();
   const handleInvite = () => {
     if (user && user.firstName === GUEST_ID) {
       toast.warning('Please Sign In to continue the action!');
@@ -26,15 +28,30 @@ const BoardBar = () => {
   useEffect(() => {
     boardBarHeight && setBoardBarHeight(boardBarHeight);
   }, [boardBarHeight, setBoardBarHeight]);
-
+  const updateBoardMutation = useMutation({
+    mutationFn: (board: BoardInterface) => API_updateBoard(board),
+    onSuccess: (result) => {
+      console.log(result);
+      setBoard(result.data);
+      queryClient.invalidateQueries({ queryKey: ['board', 'boards'] });
+    },
+    onError: (err) => {
+      console.log(err);
+      toast.error('Update Board Failed');
+    },
+  });
+  const handleUpdateBoard = () => {
+    if (user.firstName === GUEST_ID && localBoard) {
+      setBoard(localBoard);
+    }
+    if (user.firstName !== GUEST_ID && localBoard) {
+      updateBoardMutation.mutate(localBoard);
+    }
+  };
   useEffect(() => {
     setLocalBoard(board);
   }, [board]);
-  useEffect(() => {
-    if (localBoard) {
-      setBoard(localBoard);
-    }
-  }, [localBoard]);
+
   return (
     localBoard && (
       <Box className="board-bar" ref={boardBarRef} sx={{ bgcolor: theme.palette.mode === 'dark' ? 'var(--white01)' : 'var(--black01)' }}>
@@ -61,11 +78,13 @@ const BoardBar = () => {
             onKeyDown={(e) => {
               if (e.code === 'Enter') {
                 setIsReadOnly(true);
+                handleUpdateBoard();
               }
             }}
             onDoubleClick={() => setIsReadOnly(false)}
             onBlur={() => {
               setIsReadOnly(true);
+              handleUpdateBoard();
             }}
             variant={'standard'}
             size={'small'}

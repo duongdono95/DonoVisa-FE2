@@ -1,20 +1,26 @@
 import { Button } from '@mui/material';
 import React from 'react';
-import { signInWithGooglePopup } from '../../../config/firebase.utils';
-// import { API_AuthSignUp } from '../../../hooks/fetchingFunctions';
+import { signInWithGooglePopup } from '../config/firebase.utils';
+import { userFunctions } from '../hooks/userFunctions';
+import { UserInterface } from '../types/GeneralTypes';
+import { randomId } from '../hooks/GeneralHooks';
 
 const GoogleButton = () => {
-  // const signUp = API_AuthSignUp({});
+  const userSignUp = userFunctions.userSignUp({});
   const logGoogleUser = async () => {
     const response = await signInWithGooglePopup();
     console.log(response);
     if (response && response.user.email && response.user.displayName) {
-      // signUp.mutate({
-      //   email: response.user.email,
-      //   password: response.user.uid,
-      //   firstName: response.user.displayName,
-      //   lastName: response.user.providerId,
-      // });
+      const googleUser: UserInterface = {
+        id: randomId(),
+        firstName: response.user.displayName,
+        lastName: response.user.providerId,
+        email: response.user.email,
+        password: 'firebase',
+        createdAt: new Date().toISOString(),
+        updatedAt: null,
+      };
+      userSignUp.mutate(googleUser);
     }
   };
   return (

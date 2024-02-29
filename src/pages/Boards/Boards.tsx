@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import NavBar from '../../components/NavBar';
 import './Boards.scss';
 import { useAppStore } from '../../stores/AppStore';
@@ -11,18 +11,34 @@ import { Plus, Lock, Unlock, Pencil, MoreVertical, Trash } from 'lucide-react';
 import DeleteBoard from './DeleteBoard';
 import BoardForm from './BoardForm';
 import { useBoardsStore } from '../../stores/BoardsStore';
+import { API_getBoards } from '../../hooks/API_functions';
+import { useQuery } from '@tanstack/react-query';
 const Boards = () => {
   const [appBarHeight, user] = useAppStore((state) => [state.appBarHeight, state.user]);
-  const [boardList] = useBoardsStore((state) => [state.boardList]);
+  const [boardList, setBoardList] = useBoardsStore((state) => [state.boardList, state.setBoardList]);
   const theme = useTheme();
   const navigate = useNavigate();
+
   const [boardMenu, setBoardMenu] = React.useState<null | HTMLElement>(null);
   const [openDiaglog, setOpenDialog] = useState(false);
   const [dialogType, setDialogType] = useState<'create' | 'edit' | 'confirmDelete' | null>(null);
   const [clickedBoard, setClickedBoard] = useState<BoardInterface | null>(null);
   const handleNavigate = (board: BoardInterface) => {
-    navigate(`/boards/${board.slug}`, { state: { boardId: board.id } });
+    navigate(`/boards/${board.slug}`, { state: { boardId: user.firstName === GUEST_ID ? board.id : board._id } });
   };
+  const { data } = useQuery({
+    queryKey: ['boards'],
+    queryFn: () => API_getBoards(user._id as string),
+    enabled: user._id && user._id !== GUEST_ID ? true : false,
+  });
+  useEffect(() => {
+    if (!user.id) return navigate(-1);
+  }, [user]);
+  useEffect(() => {
+    if (data) {
+      if (data.code === 200) setBoardList(data.data);
+    }
+  }, [data]);
   return (
     <div className="boards-page">
       <NavBar />

@@ -5,10 +5,14 @@ import { useSortable } from '@dnd-kit/sortable';
 import { useDnD } from '../DnD/DnDContext';
 import TextFieldComponent from '../../../components/TextFieldComponent';
 import MarkdownCard from './MarkdownCard';
-import { CardInterface, MarkdownInterface } from '../../../types/GeneralTypes';
-import { boardFunctions } from '../../../hooks/boardFunctions';
+import { CardInterface, GUEST_ID, MarkdownInterface } from '../../../types/GeneralTypes';
 import { Edit } from 'lucide-react';
 import { useMarkdownStore } from '../../../stores/MarkdownStore';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { API_editCard } from '../../../hooks/API_functions';
+import { toast } from 'react-toastify';
+import { useAppStore } from '../../../stores/AppStore';
+import { useBoardsStore } from '../../../stores/BoardsStore';
 interface CardProps {
   card: CardInterface;
   dragOverlay?: boolean;
@@ -26,18 +30,29 @@ const Card = ({ dragOverlay, card }: CardProps) => {
     transition,
     opacity: isDragging ? 0.5 : undefined,
   };
-  const editCard = boardFunctions.EditCard();
+  const queryClient = useQueryClient();
+  const [user] = useAppStore((state) => [state.user]);
+  const [editCard] = useBoardsStore((state) => [state.editCard]);
+  const [cardMarkdown, setCardMarkdown] = useState<MarkdownInterface>();
+
+  const updateCardMutation = useMutation({
+    mutationFn: (card: CardInterface) => API_editCard(card),
+    onSuccess: (result) => {
+      console.log(result);
+      if (result.code === 200) {
+        queryClient.invalidateQueries({ queryKey: ['board'] });
+      }
+    },
+    onError: (error) => {
+      console.log(error);
+      toast.error('Error updating card');
+    },
+  });
   const handleSubmit = (data: CardInterface) => {
-    editCard(data);
+    if (user.firstName === GUEST_ID && data) editCard(data);
+    if (user.firstName !== GUEST_ID && data) updateCardMutation.mutate(data);
   };
 
-  const [cardMarkdown, setCardMarkdown] = useState<MarkdownInterface>();
-  useEffect(() => {
-    if (markdownList.length > 0) {
-      const md = markdownList.find((markdown) => markdown.cardId === card.id);
-      if (md) setCardMarkdown(md);
-    }
-  }, [markdownList]);
   return (
     <Box
       className={`${dragOverlay ? (theme.palette.mode === 'dark' ? 'card card-dragging-effect-light' : 'card card-dragging-effect-dark') : 'card'}`}
@@ -64,7 +79,7 @@ const Card = ({ dragOverlay, card }: CardProps) => {
       {...(openCardDialog ? undefined : listeners)}
     >
       <Box sx={{ display: 'flex', alignItems: 'center', padding: '10px' }}>
-        <TextFieldComponent data={card} handleSubmit={handleSubmit} />
+        <TextFieldComponent data={card} handleResult={handleSubmit} />
         <Edit
           onClick={(e) => {
             e.stopPropagation();
@@ -72,13 +87,6 @@ const Card = ({ dragOverlay, card }: CardProps) => {
           }}
         />
       </Box>
-      <MarkdownCard
-        card={card}
-        cardMarkdown={cardMarkdown}
-        handleSubmit={handleSubmit}
-        openCardDialog={openCardDialog}
-        setOpenCardDialog={setOpenCardDialog}
-      />
     </Box>
   );
 };

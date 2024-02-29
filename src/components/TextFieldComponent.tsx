@@ -6,15 +6,15 @@ import { useOutsideClick } from '../hooks/GeneralHooks';
 
 interface Props {
   data: any;
-  handleSubmit: (localData: any) => void;
+  handleResult: (localData: any) => void;
   fontSize?: number;
 }
-const TextFieldComponent = ({ data, handleSubmit, fontSize }: Props) => {
+const TextFieldComponent = ({ data, handleResult, fontSize }: Props) => {
   const textFieldRef = useRef<HTMLDivElement>(null);
   const [readOnly, setReadOnly] = useState(true);
   const [localData, setLocalData] = useState(data);
   const submit = () => {
-    handleSubmit(localData);
+    handleResult(localData);
     setReadOnly(true);
   };
   useOutsideClick(textFieldRef, () => {

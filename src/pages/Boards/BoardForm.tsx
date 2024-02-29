@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { Button, MenuItem, TextField, useTheme } from '@mui/material';
 import { FolderLock, Unlock, Lock } from 'lucide-react';
-import { BoardInterface, BoardSchema, VisibilityTypeEnum } from '../../types/GeneralTypes';
+import { BoardInterface, BoardSchema, GUEST_ID, VisibilityTypeEnum } from '../../types/GeneralTypes';
 import { useAppStore } from '../../stores/AppStore';
 import { emptyBoard } from '../../utils/constants';
 import { useNavigate } from 'react-router-dom';
-import { boardFunctions } from '../../hooks/boardFunctions';
-import { slugify } from '../../hooks/GeneralHooks';
+import { randomId, slugify } from '../../hooks/GeneralHooks';
+import { API_createBoard, API_updateBoard } from '../../hooks/API_functions';
+import { useBoardsStore } from '../../stores/BoardsStore';
+import { toast } from 'react-toastify';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 interface Props {
   board: BoardInterface | null;
   type: 'edit' | 'create' | 'confirmDelete' | null;
@@ -14,15 +17,37 @@ interface Props {
 }
 const BoardForm = ({ board, type, setOpenDialog }: Props) => {
   const navigate = useNavigate();
-
-  const updateBoard = boardFunctions.UpdateBoard();
-  const [user] = useAppStore((state) => [state.user]);
-
-  const [localBoard, setLocalBoard] = useState<BoardInterface>(board ?? { ...emptyBoard, ownerId: user?.id ?? '' });
-  const [error, setError] = useState<{ path: string; message: string }>({ path: '', message: '' });
   const theme = useTheme();
-  const handleCreateNew = async (e: React.FormEvent<HTMLFormElement>) => {
+  const [user] = useAppStore((state) => [state.user]);
+  const [localBoard, setLocalBoard] = useState<BoardInterface>(board ?? { ...emptyBoard, ownerId: user?._id ?? '' });
+  const [error, setError] = useState<{ path: string; message: string }>({ path: '', message: '' });
+  const [addBoard, editBoard] = useBoardsStore((state) => [state.addBoard, state.editBoard]);
+  const queryClient = useQueryClient();
+
+  const createMutation = useMutation({
+    mutationFn: (data: BoardInterface) => API_createBoard(data),
+    onSuccess: (response) => {
+      toast.success(response.message);
+      queryClient.invalidateQueries({ queryKey: ['boards'] });
+    },
+    onError: () => {
+      toast.error('Create board failed!');
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: (data: BoardInterface) => API_updateBoard(data),
+    onSuccess: (response) => {
+      queryClient.invalidateQueries({ queryKey: ['boards'] });
+    },
+    onError: () => {
+      toast.error('Create board failed!');
+    },
+  });
+
+  const handleValidate = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const newId = randomId();
     const validatedBoard = BoardSchema.safeParse(localBoard);
     if (!validatedBoard.success) {
       return setError({
@@ -30,32 +55,29 @@ const BoardForm = ({ board, type, setOpenDialog }: Props) => {
         message: validatedBoard.error.errors[0].message,
       });
     }
-    const newBoard = { ...validatedBoard.data, slug: slugify(validatedBoard.data.title) };
-    // boardFunctions.CreateBoard(setOpenDialog, newBoard);
-    setOpenDialog(false);
-  };
-  const handleUpdateBoard = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const validatedBoard = BoardSchema.safeParse(localBoard);
-    if (!validatedBoard.success) {
-      return setError({
-        path: validatedBoard.error.errors[0].path[0].toString(),
-        message: validatedBoard.error.errors[0].message,
-      });
+    // user is guest -> no need to call API, just update the store
+    if (user.firstName !== GUEST_ID) {
+      type === 'create' &&
+        createMutation.mutate({ ...validatedBoard.data, slug: slugify(validatedBoard.data.title), createdAt: new Date().toISOString() });
+      type === 'edit' &&
+        updateMutation.mutate({ ...validatedBoard.data, slug: slugify(validatedBoard.data.title), updatedAt: new Date().toISOString() });
+    } else {
+      type === 'create' && addBoard({ ...validatedBoard.data, slug: slugify(validatedBoard.data.title), id: newId });
+      type === 'edit' && editBoard({ ...validatedBoard.data, slug: slugify(validatedBoard.data.title) });
     }
-    updateBoard(validatedBoard.data);
     setOpenDialog(false);
   };
 
   useEffect(() => {
     if (!user) navigate(-1);
+    if (user._id) setLocalBoard((prev) => ({ ...prev, ownerId: user._id as string }));
   }, [user]);
   return (
     <form
       className="boards-form-modal"
       onReset={() => setLocalBoard(emptyBoard)}
       onSubmit={(e) => {
-        type === 'create' ? handleCreateNew(e) : handleUpdateBoard(e);
+        handleValidate(e);
       }}
     >
       <h2
