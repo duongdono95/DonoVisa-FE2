@@ -14,9 +14,9 @@ import {
 import { SortableContext, arrayMove, horizontalListSortingStrategy, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { createCollisionDetectionStrategy } from './CollisionDetectionTrategy';
 import { findColumnById, findItembyId } from './DnDhooks';
-import { unstable_batchedUpdates } from 'react-dom';
+// import { unstable_batchedUpdates } from 'react-dom';
 import { useDnD } from './DnDContext';
-import { BoardInterface, CardInterface, ColumnInterface } from '../../../types/GeneralTypes';
+import { BoardInterface, ColumnInterface } from '../../../types/GeneralTypes';
 import { randomId } from '../../../hooks/GeneralHooks';
 import { useBoardsStore } from '../../../stores/BoardsStore';
 import { useAppStore } from '../../../stores/AppStore';
@@ -92,6 +92,7 @@ const DroppableContainer = ({ children, vertical, board }: Props) => {
     }
     // -----------validate the active item, only card is allowed or over item !== trash && moving card between different columns -----------------------------
     if (!over.id || over.id === TRASH_ID || over.id === CREATE_NEW_ID || active.id in containerIdOrder) return;
+    console.log('active');
     const activeColumn = findColumnById(board.columns, active.id);
     const overColumn = findColumnById(board.columns, over.id);
     if (!activeColumn || !overColumn || activeColumn === overColumn) return;
@@ -129,7 +130,6 @@ const DroppableContainer = ({ children, vertical, board }: Props) => {
   }
   function handleDragEnd({ active, over }: DragEndEvent) {
     if (!active || !over || !board || !user) return;
-    console.log(startedColumn);
     const activeItem = findItembyId(board.columns, active.id);
     if (!activeItem || !over.id) return setActiveId(null);
     // check if dragged item is Column
@@ -150,7 +150,7 @@ const DroppableContainer = ({ children, vertical, board }: Props) => {
           _destroy: false,
         };
         editBoard({ ...board, columns: [...board.columns, newColumn], columnOrderIds: [...board.columnOrderIds, newColumn.id] });
-        setHandleCreateNewItemEvent({ newColumn: newColumn, originalColumn: null, activeCard: null });
+        setHandleCreateNewItemEvent(newColumn);
         setActiveId(null);
         return;
       }
@@ -167,63 +167,7 @@ const DroppableContainer = ({ children, vertical, board }: Props) => {
     // ------------------------CARD -----------------------------
     const activeColumn = findColumnById(board.columns, active.id);
     if (!activeColumn) return;
-    // if card is dragged to 'Create New' container
-    if (over.id === CREATE_NEW_ID) {
-      const activeCard = activeItem as CardInterface;
-      if (!activeCard || !activeColumn || !startedColumn || startedColumn === null) return;
 
-      const movedCard: CardInterface = {
-        id: activeCard.id,
-        ownerId: activeCard.ownerId,
-        title: activeCard.title,
-        columnId: activeCard.columnId,
-        createdAt: new Date().toString(),
-        updatedAt: null,
-        _destroy: false,
-        boardId: board.id,
-      };
-      const newColumn: ColumnInterface = {
-        id: randomId(),
-        ownerId: activeItem.ownerId,
-        boardId: (activeItem as ColumnInterface).boardId,
-        title: 'New Column',
-        cardOrderIds: [movedCard.id as string],
-        cards: [movedCard],
-        _destroy: false,
-        createdAt: new Date().toString(),
-        updatedAt: null,
-      };
-      const updateHoverCol: ColumnInterface = {
-        id: activeColumn.id,
-        ownerId: activeColumn.ownerId,
-        boardId: activeColumn.boardId,
-        title: activeColumn.title,
-        cards: activeColumn.cards.filter((card) => card.id !== activeCard.id),
-        cardOrderIds: activeColumn.cardOrderIds.filter((c) => c !== activeCard.id),
-        _destroy: false,
-        createdAt: activeColumn.createdAt,
-        updatedAt: new Date().toString(),
-      };
-      const updatedColumns = [
-        ...board.columns.map((c) => (c.id === updateHoverCol.id ? updateHoverCol : c)),
-        { ...newColumn, cards: [{ ...movedCard, columnId: newColumn.id }] },
-      ];
-
-      unstable_batchedUpdates(() =>
-        editBoard({ ...board, columns: updatedColumns, columnOrderIds: updatedColumns.map((column) => column.id), updatedAt: new Date().toString() }),
-      );
-
-      const originalCol = board.columns.find((c) => c.id === startedColumn.id);
-      originalCol &&
-        setHandleCreateNewItemEvent({
-          originalColumn: originalCol,
-          newColumn: newColumn,
-          activeCard: { ...movedCard, columnId: newColumn.id },
-        });
-      setActiveId(null);
-
-      return;
-    }
     // ---------------- DELETE A Card/Column ----------------
     if (over.id === TRASH_ID) {
       // DELETE A COLUMN

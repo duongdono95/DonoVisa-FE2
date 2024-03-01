@@ -1,18 +1,17 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
-import { MarkdownInterface } from '../types/GeneralTypes';
-import { emptyMarkdown } from '../utils/constants';
+import { CardInterface, MarkdownInterface } from '../types/GeneralTypes';
 
 interface MarkdownState {
   markdownList: MarkdownInterface[];
-  activeMarkdown: MarkdownInterface;
+  activeCard: CardInterface | null;
 }
 interface MarkdownSetState {
   setMarkdownList: (newMarkdownList: MarkdownInterface[]) => void;
   addToMarkdownList: (markDown: MarkdownInterface) => void;
   removeFromMarkdownList: (markdown: MarkdownInterface) => void;
   editFromMarkdownList: (markdown: MarkdownInterface) => void;
-  setActiveMarkdown: (markdown: MarkdownInterface) => void;
+  setActiveCard: (card: CardInterface | null) => void;
 }
 
 export const useMarkdownStore = create<MarkdownState & MarkdownSetState>()(
@@ -22,20 +21,28 @@ export const useMarkdownStore = create<MarkdownState & MarkdownSetState>()(
         markdownList: [],
         setMarkdownList: (newMarkdownList: MarkdownInterface[]) => set(() => ({ markdownList: newMarkdownList })),
         addToMarkdownList: (markDown: MarkdownInterface) =>
-          set((state) => ({
-            markdownList: [...state.markdownList, markDown],
-          })),
+          set((state) => {
+            const markdown = state.markdownList.find((md) => md.id === markDown.id);
+            if (!markdown) {
+              return {
+                markdownList: [...state.markdownList, markDown],
+              };
+            } else {
+              return {
+                markdownList: state.markdownList.map((md) => (md.id === markDown.id ? markDown : md)),
+              };
+            }
+          }),
         removeFromMarkdownList: (markdown: MarkdownInterface) =>
           set((state) => ({ markdownList: state.markdownList.filter((md) => md.id !== markdown.id) })),
         editFromMarkdownList: (markdown: MarkdownInterface) =>
           set((state) => {
-            console.log(state.markdownList.map((md) => (md.id === markdown.id ? markdown : md)));
             return {
               markdownList: state.markdownList.map((md) => (md.id === markdown.id ? markdown : md)),
             };
           }),
-        activeMarkdown: emptyMarkdown,
-        setActiveMarkdown: (markdown: MarkdownInterface) => set(() => ({ activeMarkdown: markdown })),
+        activeCard: null,
+        setActiveCard: (card: CardInterface | null) => set(() => ({ activeCard: card })),
       }),
       { name: 'DonoVista Markdown Store' },
     ),

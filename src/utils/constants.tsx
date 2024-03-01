@@ -42,6 +42,7 @@ export const GuestAccount: UserInterface = {
 export const emptyMarkdown: MarkdownInterface = {
   _id: '',
   id: randomId(),
+  userId: '',
   cardId: '',
   content: '',
   createdAt: new Date().toString(),

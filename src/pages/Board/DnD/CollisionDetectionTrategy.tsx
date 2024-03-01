@@ -12,7 +12,7 @@ import { findColumnById } from './DnDhooks';
 
 import { useDnD } from './DnDContext';
 import { CREATE_NEW_ID, TRASH_ID } from './DroppableContainer';
-import { BoardInterface, ColumnInterface } from '../../../types/GeneralTypes';
+import { BoardInterface } from '../../../types/GeneralTypes';
 
 export const createCollisionDetectionStrategy = (
   lastOverId: React.MutableRefObject<UniqueIdentifier | null>,
@@ -34,7 +34,7 @@ export const createCollisionDetectionStrategy = (
     // --------------------------------- collision detection logic from here ----------------------
     // Finding Droppable Intersection for the COLUMN
     if (overId && activeId && containerIdOrder.includes(activeId as string)) {
-      if (overId === CREATE_NEW_ID || TRASH_ID) {
+      if (overId === CREATE_NEW_ID || overId === TRASH_ID) {
         return [{ id: overId }];
       }
 
@@ -46,7 +46,7 @@ export const createCollisionDetectionStrategy = (
 
     // Finding Droppable Intersection for the CARD
     if (overId) {
-      if (overId === TRASH_ID) {
+      if (overId === TRASH_ID || overId === CREATE_NEW_ID) {
         return intersections;
       }
 

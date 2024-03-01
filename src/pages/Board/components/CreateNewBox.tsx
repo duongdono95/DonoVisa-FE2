@@ -6,7 +6,7 @@ import NewColumnForm from './NewColumnForm';
 import { CREATE_NEW_ID } from '../DnD/DroppableContainer';
 import { useDnD } from '../DnD/DnDContext';
 import { useMutation } from '@tanstack/react-query';
-import { CardInterface, ColumnInterface } from '../../../types/GeneralTypes';
+import { ColumnInterface } from '../../../types/GeneralTypes';
 import { API_duplicate } from '../../../hooks/API_functions';
 import { toast } from 'react-toastify';
 
@@ -29,8 +29,7 @@ export default function CreateNewBox() {
   const [isExpanded, setIsExpanded] = useState(false);
   const { handleCreateNewItemEvent } = useDnD();
   const createNewMutation = useMutation({
-    mutationFn: (data: { originalColumn: null | ColumnInterface; newColumn: ColumnInterface | null; activeCard: CardInterface | null }) =>
-      API_duplicate(data.originalColumn, data.newColumn, data.activeCard),
+    mutationFn: (newColumn: ColumnInterface | null) => API_duplicate(newColumn),
     onSuccess: (result) => {
       console.log(result);
     },
@@ -40,11 +39,7 @@ export default function CreateNewBox() {
   });
   useEffect(() => {
     if (handleCreateNewItemEvent) {
-      createNewMutation.mutate({
-        activeCard: handleCreateNewItemEvent.activeCard,
-        newColumn: handleCreateNewItemEvent.newColumn,
-        originalColumn: handleCreateNewItemEvent.originalColumn,
-      });
+      createNewMutation.mutate(handleCreateNewItemEvent);
     }
   }, [handleCreateNewItemEvent]);
   return (

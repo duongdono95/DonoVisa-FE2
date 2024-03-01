@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { BoardInterface, CardInterface, ColumnInterface } from '../types/GeneralTypes';
+import { BoardInterface, CardInterface, ColumnInterface, MarkdownInterface } from '../types/GeneralTypes';
 
 // ------------------------------ BOARD ---------------------------------- //
 export const API_createBoard = async (board: BoardInterface) => {
@@ -72,12 +72,28 @@ export const API_moveCard = async (oriCol: ColumnInterface, movedCol: ColumnInte
   return response.data;
 };
 
-export const API_duplicate = async (originalColumn: null | ColumnInterface, newColumn: ColumnInterface | null, activeCard: CardInterface | null) => {
-  const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/boards/duplicate`, {
-    originalColumn: originalColumn,
-    newColumn: newColumn,
-    activeCard: activeCard,
-  });
+export const API_duplicate = async (newColumn: ColumnInterface | null) => {
+  const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/boards/duplicate`, newColumn);
   return response.data;
 };
 // ------------------------------ MARKDOWN ---------------------------------- //
+
+export const API_createMarkdown = async (markdown: MarkdownInterface) => {
+  const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/markdown`, markdown);
+  return response.data;
+};
+
+export const API_getMarkdown = async (markdownId: string) => {
+  const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/markdown/${markdownId}`);
+  return response.data;
+};
+
+export const API_updateMarkdown = async (markdown: MarkdownInterface) => {
+  const response = await axios.put(`${import.meta.env.VITE_BASE_URL}/markdown`, markdown);
+  return response.data;
+};
+
+export const API_deleteMarkdown = async (markdownId: string) => {
+  const response = await axios.delete(`${import.meta.env.VITE_BASE_URL}/markdown/${markdownId}`);
+  return response.data;
+};

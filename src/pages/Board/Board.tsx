@@ -12,12 +12,14 @@ import { GUEST_ID } from '../../types/GeneralTypes';
 import { useQuery } from '@tanstack/react-query';
 import { API_getBoard } from '../../hooks/API_functions';
 import { Loader2 } from 'lucide-react';
+import MarkdownCard from './components/MarkdownCard';
 
 const Board = () => {
   const navigate = useNavigate();
   const [setBoard, boardList, board] = useBoardsStore((state) => [state.setBoard, state.boardList, state.board]);
   const { state } = useLocation();
   const [appBarHeight, boardBarHeight, user] = useAppStore((state) => [state.appBarHeight, state.boardBarHeight, state.user]);
+
   const { data, isLoading } = useQuery({
     queryKey: ['board'],
     queryFn: () => API_getBoard(state.boardId),
@@ -38,6 +40,7 @@ const Board = () => {
 
   return (
     <div className="board-page">
+      <MarkdownCard />
       <NavBar />
       <Box
         className="board-body"

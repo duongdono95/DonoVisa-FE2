@@ -1,26 +1,25 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Box, useTheme } from '@mui/material';
 import { CSS } from '@dnd-kit/utilities';
 import { useSortable } from '@dnd-kit/sortable';
 import { useDnD } from '../DnD/DnDContext';
 import TextFieldComponent from '../../../components/TextFieldComponent';
-import MarkdownCard from './MarkdownCard';
-import { CardInterface, GUEST_ID, MarkdownInterface } from '../../../types/GeneralTypes';
+import { CardInterface, GUEST_ID } from '../../../types/GeneralTypes';
 import { Edit } from 'lucide-react';
-import { useMarkdownStore } from '../../../stores/MarkdownStore';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { API_editCard } from '../../../hooks/API_functions';
 import { toast } from 'react-toastify';
 import { useAppStore } from '../../../stores/AppStore';
 import { useBoardsStore } from '../../../stores/BoardsStore';
+import { useMarkdownStore } from '../../../stores/MarkdownStore';
 interface CardProps {
   card: CardInterface;
   dragOverlay?: boolean;
 }
 const Card = ({ dragOverlay, card }: CardProps) => {
   const theme = useTheme();
-  const [markdownList] = useMarkdownStore((state) => [state.markdownList]);
-  const { activeItem, isDraggingToTrash, openCardDialog, setOpenCardDialog } = useDnD();
+  const [setActiveCard] = useMarkdownStore((state) => [state.setActiveCard]);
+  const { activeItem, isDraggingToTrash } = useDnD();
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: card.id as string,
     data: card as CardInterface,
@@ -33,7 +32,6 @@ const Card = ({ dragOverlay, card }: CardProps) => {
   const queryClient = useQueryClient();
   const [user] = useAppStore((state) => [state.user]);
   const [editCard] = useBoardsStore((state) => [state.editCard]);
-  const [cardMarkdown, setCardMarkdown] = useState<MarkdownInterface>();
 
   const updateCardMutation = useMutation({
     mutationFn: (card: CardInterface) => API_editCard(card),
@@ -76,14 +74,14 @@ const Card = ({ dragOverlay, card }: CardProps) => {
       ref={activeItem && 'cards' in activeItem ? undefined : setNodeRef}
       style={dndKitCardStyles}
       {...attributes}
-      {...(openCardDialog ? undefined : listeners)}
+      {...listeners}
     >
       <Box sx={{ display: 'flex', alignItems: 'center', padding: '10px' }}>
         <TextFieldComponent data={card} handleResult={handleSubmit} />
         <Edit
           onClick={(e) => {
             e.stopPropagation();
-            setOpenCardDialog(true);
+            setActiveCard(card);
           }}
         />
       </Box>

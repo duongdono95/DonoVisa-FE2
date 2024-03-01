@@ -20,11 +20,12 @@ import { MarkdownInterface } from '../types/GeneralTypes';
 
 interface Props {
   markdown: MarkdownInterface;
-  setMarkdown: React.Dispatch<React.SetStateAction<MarkdownInterface>>;
+  setMarkdown: React.Dispatch<React.SetStateAction<MarkdownInterface | null>>;
 }
 const Markdown = ({ markdown, setMarkdown }: Props) => {
   const handleMarkdownChange = (newMarkdown: string) => {
     setMarkdown((prev) => {
+      if (!prev) return null;
       return { ...prev, content: newMarkdown, updatedAt: new Date().toISOString() };
     });
   };
@@ -45,7 +46,8 @@ const Markdown = ({ markdown, setMarkdown }: Props) => {
 
   return (
     <MDXEditor
-      markdown={markdown?.content ?? ''}
+      key={markdown.content}
+      markdown={markdown.content}
       onChange={handleMarkdownChange}
       autoFocus
       plugins={[
