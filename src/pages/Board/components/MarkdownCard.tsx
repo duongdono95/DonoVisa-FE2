@@ -1,5 +1,5 @@
-import { Box, Button, Dialog, TextField } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import { Box, Dialog, TextField } from '@mui/material';
+import { useEffect, useState } from 'react';
 import { useMarkdownStore } from '../../../stores/MarkdownStore';
 import { useBoardsStore } from '../../../stores/BoardsStore';
 import Markdown from '../../../components/Markdown';
@@ -13,7 +13,7 @@ import { emptyMarkdown } from '../../../utils/constants';
 import { randomId } from '../../../hooks/GeneralHooks';
 
 const MarkdownCard = () => {
-  const [activeCard, setActiveCard, markdownList, addToMarkdownList, localStorage] = useMarkdownStore((state) => [
+  const [activeCard, setActiveCard, markdownList, addToMarkdownList] = useMarkdownStore((state) => [
     state.activeCard,
     state.setActiveCard,
     state.markdownList,

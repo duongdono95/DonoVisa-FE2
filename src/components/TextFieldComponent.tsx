@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Box, IconButton, TextField } from '@mui/material';
 import { Send } from 'lucide-react';
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useOutsideClick } from '../hooks/GeneralHooks';
 
 interface Props {

@@ -35,7 +35,7 @@ const Column = ({ column, children, dragOverlay }: ColumnProps) => {
     opacity: isDragging ? 0.5 : undefined,
   };
 
-  const { isDraggingToTrash, openCardDialog } = useDnD();
+  const { isDraggingToTrash } = useDnD();
   const [isExpanded, setIsExpanded] = useState(false);
 
   const updateColumnMutation = useMutation({

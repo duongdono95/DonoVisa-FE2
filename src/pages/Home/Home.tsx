@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Box, Button, Grow, TextField, useTheme } from '@mui/material';
 import './Home.scss';
 import BrightModeToggle from '../../components/BrightModeToggle';
@@ -8,7 +8,6 @@ import { useAppStore } from '../../stores/AppStore';
 import { GUEST_ID } from '../../types/GeneralTypes';
 import { z } from 'zod';
 import { useBoardsStore } from '../../stores/BoardsStore';
-import { useMutation } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import Readme from './Readme';
 export default function Home() {

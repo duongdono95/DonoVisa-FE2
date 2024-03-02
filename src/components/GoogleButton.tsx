@@ -1,5 +1,4 @@
 import { Button } from '@mui/material';
-import React from 'react';
 import { signInWithGooglePopup } from '../config/firebase.utils';
 import { userFunctions } from '../hooks/userFunctions';
 import { UserInterface } from '../types/GeneralTypes';

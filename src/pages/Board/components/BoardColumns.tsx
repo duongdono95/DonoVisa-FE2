@@ -26,7 +26,7 @@ const BoardColumns = ({ boardBarHeight }: Props) => {
   const [board] = useBoardsStore((state) => [state.board]);
   const [user] = useAppStore((state) => [state.user]);
   const queryClient = useQueryClient();
-  const { dragColumnEndEvent, setDragColumnEndEvent, dragCardEndEvent, setDragCardEndEvent, handleCreateNewItemEvent } = useDnD();
+  const { dragColumnEndEvent, setDragColumnEndEvent, dragCardEndEvent, setDragCardEndEvent } = useDnD();
   // ------------------------------------------------- Move Column ------------------------------------------------
   const moveColumnsMutation = useMutation({
     mutationFn: (board: BoardInterface) => API_updateBoard(board),

@@ -1,10 +1,9 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 
 import { Box, useTheme } from '@mui/material';
 import { useSortable } from '@dnd-kit/sortable';
 import { Trash2 } from 'lucide-react';
 import { TRASH_ID } from '../DnD/DroppableContainer';
-import { useBoardsStore } from '../../../stores/BoardsStore';
 import { useDnD } from '../DnD/DnDContext';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { CardInterface, ColumnInterface, GUEST_ID } from '../../../types/GeneralTypes';

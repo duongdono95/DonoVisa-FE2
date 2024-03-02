@@ -37,7 +37,7 @@ const BoardForm = ({ board, type, setOpenDialog }: Props) => {
 
   const updateMutation = useMutation({
     mutationFn: (data: BoardInterface) => API_updateBoard(data),
-    onSuccess: (response) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['boards'] });
     },
     onError: () => {

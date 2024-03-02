@@ -1,5 +1,5 @@
 import { AppBar, Avatar, Box, Button, InputAdornment, MenuItem, MenuList, TextField, Tooltip, useTheme } from '@mui/material';
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { useAppStore } from '../stores/AppStore';
 import Logo2 from '../assets/Logo2';
 import { LogOut, Search, User2 } from 'lucide-react';

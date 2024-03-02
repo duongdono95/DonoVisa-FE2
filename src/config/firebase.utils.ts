@@ -4,6 +4,7 @@ import { initializeApp } from 'firebase/app';
 
 // Initialize Firebase
 const firebaseApp = initializeApp(firebaseConfig);
+console.log(firebaseApp);
 // Initialize Firebase Auth provider
 const provider = new GoogleAuthProvider();
 

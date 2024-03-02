@@ -1,4 +1,3 @@
-import React from 'react';
 import { Box, useTheme } from '@mui/material';
 import { CSS } from '@dnd-kit/utilities';
 import { useSortable } from '@dnd-kit/sortable';

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import './Board.scss';
 import { useAppStore } from '../../stores/AppStore';
 import { useLocation, useNavigate } from 'react-router-dom';

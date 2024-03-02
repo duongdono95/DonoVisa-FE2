@@ -1,10 +1,10 @@
 import { Box, IconButton, TextField, useTheme } from '@mui/material';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { randomId, useOutsideClick } from '../../../hooks/GeneralHooks';
 import { Send } from 'lucide-react';
 import { CardInterface, CardSchema, ColumnInterface, GUEST_ID } from '../../../types/GeneralTypes';
 import { useAppStore } from '../../../stores/AppStore';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { API_createCard } from '../../../hooks/API_functions';
 import { toast } from 'react-toastify';
 import { useBoardsStore } from '../../../stores/BoardsStore';

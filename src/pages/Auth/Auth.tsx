@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import './Auth.scss';
 import AuthModal from '../../components/AuthModal';
 import BrightModeToggle from '../../components/BrightModeToggle';

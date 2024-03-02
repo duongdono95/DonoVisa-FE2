@@ -1,6 +1,6 @@
 import { Avatar, AvatarGroup, Badge, Box, Button, TextField, Tooltip, useTheme } from '@mui/material';
 import { Star, UserPlus } from 'lucide-react';
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { CrownBadge, useDivSizeThroughRef } from '../../../hooks/GeneralHooks';
 import { toast } from 'react-toastify';
 import { BoardInterface, GUEST_ID } from '../../../types/GeneralTypes';

@@ -14,7 +14,7 @@ interface Props {
 
 export default function DeleteBoard({ board, setOpenDialog, setBoardMenu }: Props) {
   const [user] = useAppStore((state) => [state.user]);
-  const [deleteBoard, setBoard, boardList] = useBoardsStore((state) => [state.deleteBoard, state.setBoard, state.boardList]);
+  const [deleteBoard, setBoard] = useBoardsStore((state) => [state.deleteBoard, state.setBoard, state.boardList]);
   const queryClient = useQueryClient();
   const deleteMutation = useMutation({
     mutationFn: (_id: string) => API_deleteBoard(_id),
