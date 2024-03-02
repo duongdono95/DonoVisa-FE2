@@ -110,7 +110,7 @@ const BoardBar = () => {
                 />
               </Tooltip>
             </Badge>
-            {localBoard.memberIds.map((user, index) => {
+            {localBoard.memberIds.map((index) => {
               return (
                 <Avatar
                   key={index}
