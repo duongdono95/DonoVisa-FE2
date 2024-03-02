@@ -4,6 +4,7 @@ import { useAppStore } from '../stores/AppStore';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { UserInterface } from '../types/GeneralTypes';
+import { toast } from 'react-toastify';
 
 // const demoFunction = () => {
 //   const [state] = useAppStore((state) => [state]);
@@ -62,6 +63,7 @@ const userSignUp = ({ setError }: userAuthProps) => {
     },
     onError: (err) => {
       console.log(err);
+      toast.error('Login failed');
     },
   });
 };

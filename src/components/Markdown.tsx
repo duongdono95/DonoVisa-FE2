@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import '@mdxeditor/editor/style.css';
 import {
   MDXEditor,
@@ -19,15 +19,14 @@ import { toast } from 'react-toastify';
 import { MarkdownInterface } from '../types/GeneralTypes';
 
 interface Props {
-  markdown: MarkdownInterface;
-  setMarkdown: React.Dispatch<React.SetStateAction<MarkdownInterface | null>>;
+  localMarkdown: MarkdownInterface;
+  setLocalMarkdown: React.Dispatch<React.SetStateAction<MarkdownInterface>>;
 }
-const Markdown = ({ markdown, setMarkdown }: Props) => {
+const Markdown = ({ localMarkdown, setLocalMarkdown }: Props) => {
+  const [localMd, setLocalMd] = useState(localMarkdown);
   const handleMarkdownChange = (newMarkdown: string) => {
-    setMarkdown((prev) => {
-      if (!prev) return null;
-      return { ...prev, content: newMarkdown, updatedAt: new Date().toISOString() };
-    });
+    setLocalMarkdown({ ...localMarkdown, content: newMarkdown });
+    setLocalMd({ ...localMarkdown, content: newMarkdown });
   };
   const convertImageToBase64 = (file: File) => {
     return new Promise((resolve, reject) => {
@@ -43,13 +42,20 @@ const Markdown = ({ markdown, setMarkdown }: Props) => {
       reader.onerror = (error) => reject(error);
     });
   };
-
+  useEffect(() => {
+    if (localMarkdown) {
+      setLocalMd(localMarkdown);
+    }
+  }, [localMarkdown]);
   return (
     <MDXEditor
-      key={markdown.content}
-      markdown={markdown.content}
+      key={localMarkdown.id}
+      markdown={localMarkdown.content}
       onChange={handleMarkdownChange}
       autoFocus
+      onBlur={() => {
+        setLocalMarkdown(localMd);
+      }}
       plugins={[
         imagePlugin({
           imageUploadHandler: async (image: File) => {

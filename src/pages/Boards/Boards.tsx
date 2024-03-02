@@ -65,7 +65,7 @@ const Boards = () => {
               setOpenDialog(true);
               setDialogType('create');
               setClickedBoard({ ...emptyBoard, ownerId: user?.id ?? '' });
-              user && user.firstName === GUEST_ID && toast.warning('Guest Mode - The Created Data will be saved for 24 hours.');
+              user && user.firstName === GUEST_ID && toast.warning('Guest Mode - The Created Data will be saved within the session.');
             }}
           >
             <Plus />

@@ -79,21 +79,21 @@ export const API_duplicate = async (newColumn: ColumnInterface | null) => {
 // ------------------------------ MARKDOWN ---------------------------------- //
 
 export const API_createMarkdown = async (markdown: MarkdownInterface) => {
-  const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/markdown`, markdown);
+  const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/markdowns`, markdown);
   return response.data;
 };
 
 export const API_getMarkdown = async (markdownId: string) => {
-  const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/markdown/${markdownId}`);
+  const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/markdowns/${markdownId}`);
   return response.data;
 };
 
 export const API_updateMarkdown = async (markdown: MarkdownInterface) => {
-  const response = await axios.put(`${import.meta.env.VITE_BASE_URL}/markdown`, markdown);
+  const response = await axios.put(`${import.meta.env.VITE_BASE_URL}/markdowns`, markdown);
   return response.data;
 };
 
 export const API_deleteMarkdown = async (markdownId: string) => {
-  const response = await axios.delete(`${import.meta.env.VITE_BASE_URL}/markdown/${markdownId}`);
+  const response = await axios.delete(`${import.meta.env.VITE_BASE_URL}/markdowns/${markdownId}`);
   return response.data;
 };

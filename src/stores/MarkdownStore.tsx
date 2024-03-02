@@ -12,6 +12,7 @@ interface MarkdownSetState {
   removeFromMarkdownList: (markdown: MarkdownInterface) => void;
   editFromMarkdownList: (markdown: MarkdownInterface) => void;
   setActiveCard: (card: CardInterface | null) => void;
+  localStorage: () => void;
 }
 
 export const useMarkdownStore = create<MarkdownState & MarkdownSetState>()(
@@ -22,6 +23,7 @@ export const useMarkdownStore = create<MarkdownState & MarkdownSetState>()(
         setMarkdownList: (newMarkdownList: MarkdownInterface[]) => set(() => ({ markdownList: newMarkdownList })),
         addToMarkdownList: (markDown: MarkdownInterface) =>
           set((state) => {
+            console.log(markDown);
             const markdown = state.markdownList.find((md) => md.id === markDown.id);
             if (!markdown) {
               return {
@@ -43,6 +45,10 @@ export const useMarkdownStore = create<MarkdownState & MarkdownSetState>()(
           }),
         activeCard: null,
         setActiveCard: (card: CardInterface | null) => set(() => ({ activeCard: card })),
+        localStorage: () => {
+          console.log(localStorage);
+          localStorage.removeItem('DonoVista Markdown Store');
+        },
       }),
       { name: 'DonoVista Markdown Store' },
     ),

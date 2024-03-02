@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Box, Button, Grow, TextField, useTheme } from '@mui/material';
 import './Home.scss';
 import BrightModeToggle from '../../components/BrightModeToggle';
@@ -9,6 +9,8 @@ import { GUEST_ID } from '../../types/GeneralTypes';
 import { z } from 'zod';
 import { useBoardsStore } from '../../stores/BoardsStore';
 import { useMutation } from '@tanstack/react-query';
+import { toast } from 'react-toastify';
+import Readme from './Readme';
 export default function Home() {
   const theme = useTheme();
   const [state, setState] = useState<'instroduction' | 'features'>('instroduction');
@@ -24,7 +26,9 @@ export default function Home() {
     if (!validatedEmail.success) return setInvalidEmail(validatedEmail.error.errors[0].message);
     return navigate('/sign-up', { state: { email: email } });
   };
-
+  useEffect(() => {
+    toast(<Readme />);
+  }, []);
   return (
     <div className="Home">
       <div className="bright-mode" style={{ display: 'flex', alignItems: 'center', gap: '10px', opacity: 0.7 }}>

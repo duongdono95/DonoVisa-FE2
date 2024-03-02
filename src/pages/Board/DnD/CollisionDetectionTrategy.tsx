@@ -37,7 +37,6 @@ export const createCollisionDetectionStrategy = (
       if (overId === CREATE_NEW_ID || overId === TRASH_ID) {
         return [{ id: overId }];
       }
-
       return closestCenter({
         ...args,
         droppableContainers: args.droppableContainers.filter((container) => containerIdOrder.includes(container.id as string)),
@@ -46,10 +45,12 @@ export const createCollisionDetectionStrategy = (
 
     // Finding Droppable Intersection for the CARD
     if (overId) {
-      if (overId === TRASH_ID || overId === CREATE_NEW_ID) {
+      if (overId === TRASH_ID) {
         return intersections;
       }
-
+      if (overId === CREATE_NEW_ID) {
+        return intersections;
+      }
       if (containerIdOrder.includes(overId as string)) {
         const column = findColumnById(boards.columns, overId);
         if (column && column.cards.length > 0) {
